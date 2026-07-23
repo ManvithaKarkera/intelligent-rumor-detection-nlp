@@ -1,6 +1,6 @@
 # Intelligent Rumor Detection System Using NLP Techniques
 
-An automated system to classify social media text — and optionally images — as **Rumor** or **Non-Rumor**, using fine-tuned transformer models (BERT, multilingual BERT) and a multimodal fusion model (BERT + ResNet50), with explainable predictions (LIME, Grad-CAM) and automatic multilingual routing for Indian regional languages.
+An automated system to classify social media text and images as **Rumor** or **Non-Rumor**, using fine-tuned transformer models (BERT, multilingual BERT) and a multimodal fusion model (BERT + ResNet50), with explainable predictions (LIME, Grad-CAM) and automatic multilingual routing for Indian regional languages.
 
 ---
 
@@ -114,13 +114,13 @@ pip install -r requirements.txt
 
 **Download trained model checkpoints** and place in the project root:
 
-- `rumor_model/` — English BERT checkpoint
-- `rumor_model_multilingual/` — mBERT checkpoint
-- `multimodal_artifacts/best_multimodal_model.pth` — Multimodal fusion model
-- `multimodal_artifacts/best_text_only.pth` — Text-Only baseline
-- `multimodal_artifacts/best_image_only.pth` — Image-Only baseline
+- `rumor_model/`-English BERT checkpoint
+- `rumor_model_multilingual/`-mBERT checkpoint
+- `multimodal_artifacts/best_multimodal_model.pth`-Multimodal fusion model
+- `multimodal_artifacts/best_text_only.pth`-Text-Only baseline
+- `multimodal_artifacts/best_image_only.pth`-Image-Only baseline
 
-> Model download links: *(add your Google Drive links here)*
+> Model download links: *(https://drive.google.com/file/d/10pgqhGIgU3joqXr3o-BDoWWAWNUd3iPs/view?usp=drive_link,https://drive.google.com/file/d/10agq9H92d88z5G_5gLIi4tY_I5_aYl3T/view?usp=drive_link)*
 
 ---
 
@@ -132,7 +132,7 @@ jupyter notebook rumor-detection-nlp.ipynb
 ```
 Run cells in order: data loading → cleaning → BERT/mBERT training → multimodal training → inference backend → Gradio UI.
 
-### Option 2 — Run inference only (models already trained)
+### Option 2-Run inference only (models already trained)
 
 Run only the last 2 cells (inference backend + Gradio UI cell). The app launches at a local URL.
 
@@ -188,7 +188,7 @@ ISRO successfully launches Chandrayaan-4 mission ahead of schedule, confirms off
 
 ## Multilingual Support — Important Note
 
-The multilingual model was fine-tuned on PHEME (primarily English) and IFND (Indian English). Hindi/Kannada/Tamil/Telugu/Malayalam predictions demonstrate mBERT's **zero-shot cross-lingual transfer** capability — its shared sub-word vocabulary covers 104 languages, allowing reasonable generalization without direct training on labeled regional-language data.
+The multilingual model was fine-tuned on PHEME (primarily English) and IFND (Indian English). Hindi/Kannada/Tamil/Telugu/Malayalam predictions demonstrate mBERT's **zero-shot cross-lingual transfer** capability-its shared sub-word vocabulary covers 104 languages, allowing reasonable generalization without direct training on labeled regional-language data.
 
 Fine-tuning on dedicated Indian-language datasets (HinFakeNews, Dravidian Fake dataset) is noted as future scope and would significantly improve regional language accuracy.
 
