@@ -1,4 +1,4 @@
-# 🛡️ Intelligent Rumor Detection System Using NLP Techniques
+# Intelligent Rumor Detection System Using NLP Techniques
 
 An automated system to classify social media text — and optionally images — as **Rumor** or **Non-Rumor**, using fine-tuned transformer models (BERT, multilingual BERT) and a multimodal fusion model (BERT + ResNet50), with explainable predictions (LIME, Grad-CAM) and automatic multilingual routing for Indian regional languages.
 
