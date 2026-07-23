@@ -117,7 +117,6 @@ pip install -r requirements.txt
 - `multimodal_artifacts/best_text_only.pth`-Text-Only baseline
 - `multimodal_artifacts/best_image_only.pth`-Image-Only baseline
 
-> Model download links: *(https://drive.google.com/file/d/10pgqhGIgU3joqXr3o-BDoWWAWNUd3iPs/view?usp=drive_link,https://drive.google.com/file/d/10agq9H92d88z5G_5gLIi4tY_I5_aYl3T/view?usp=drive_link)*
 
 
 ## Usage
