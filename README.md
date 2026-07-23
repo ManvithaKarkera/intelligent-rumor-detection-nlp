@@ -2,7 +2,7 @@
 
 An automated system to classify social media text and images as **Rumor** or **Non-Rumor**, using fine-tuned transformer models (BERT, multilingual BERT) and a multimodal fusion model (BERT + ResNet50), with explainable predictions (LIME, Grad-CAM) and automatic multilingual routing for Indian regional languages.
 
----
+
 
 ## Why This Project
 
@@ -14,7 +14,7 @@ Rumors and misinformation spread rapidly on social media, often faster than they
 
 This project builds a system that addresses all three gaps in one pipeline — **classification, explainability, and multilingual/multimodal support** — with a specific focus on Indian languages and India-relevant content.
 
----
+
 
 ## How It Works
 
@@ -25,7 +25,7 @@ This project builds a system that addresses all three gaps in one pipeline — *
 5. **LIME** (text) and **Grad-CAM** (image) generate explanations showing which words/regions drove the prediction
 6. A confidence-based **domain-shift warning** flags predictions that may fall outside the model's training distribution
 
----
+
 
 ## Features
 
@@ -43,7 +43,7 @@ This project builds a system that addresses all three gaps in one pipeline — *
 | NSFW protection | Subreddit blocklist + metadata filtering on Fakeddit image downloads |
 | Interactive UI | Gradio: live status indicators, animated inference report, tabbed Explainability view |
 
----
+
 
 ## Results
 
@@ -64,7 +64,6 @@ This project builds a system that addresses all three gaps in one pipeline — *
 
 > The multimodal model consistently outperforms both single-modality baselines, confirming that combining text and image signals improves rumor detection.
 
----
 
 ## Datasets
 
@@ -85,7 +84,6 @@ This project builds a system that addresses all three gaps in one pipeline — *
 - **Used for:** Text-Only, Image-Only, and Multimodal (BERT + ResNet50) ablation models
 - **Safety:** All image downloads filtered via NSFW metadata column before use
 
----
 
 ## Tech Stack
 
@@ -100,7 +98,6 @@ This project builds a system that addresses all three gaps in one pipeline — *
 | Training environment | Kaggle Notebooks (GPU — Tesla T4/P100) |
 | Languages supported | English, Hindi, Kannada, Tamil, Telugu, Malayalam, Bengali, Punjabi, Gujarati, Odia |
 
----
 
 ## Installation
 
@@ -122,7 +119,6 @@ pip install -r requirements.txt
 
 > Model download links: *(https://drive.google.com/file/d/10pgqhGIgU3joqXr3o-BDoWWAWNUd3iPs/view?usp=drive_link,https://drive.google.com/file/d/10agq9H92d88z5G_5gLIi4tY_I5_aYl3T/view?usp=drive_link)*
 
----
 
 ## Usage
 
@@ -147,7 +143,7 @@ Run only the last 2 cells (inference backend + Gradio UI cell). The app launches
    - LIME word highlights (red = pushes toward Rumor, green = toward Non-Rumor)
    - Grad-CAM heatmap (if image was uploaded)
 
----
+
 
 ## Example Queries
 
@@ -192,7 +188,7 @@ The multilingual model was fine-tuned on PHEME (primarily English) and IFND (Ind
 
 Fine-tuning on dedicated Indian-language datasets (HinFakeNews, Dravidian Fake dataset) is noted as future scope and would significantly improve regional language accuracy.
 
----
+
 
 ## Project Structure
 
@@ -212,7 +208,7 @@ intelligent-rumor-detection-nlp/
     └── best_image_only.pth
 ```
 
----
+
 
 ## Notebook Structure (32 Cells)
 
@@ -228,7 +224,7 @@ intelligent-rumor-detection-nlp/
 | 28–30 | Inference backend (run_inference, LIME, Grad-CAM) |
 | 31–32 | Gradio UI |
 
----
+
 
 ## Future Scope
 
