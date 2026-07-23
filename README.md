@@ -238,6 +238,5 @@ intelligent-rumor-detection-nlp/
 - Propagation-based signals (retweet patterns, user credibility scores)
 - Lightweight mobile-friendly model (DistilBERT) for low-resource deployment
 
----
 
 
