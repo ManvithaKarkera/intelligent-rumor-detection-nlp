@@ -4,8 +4,6 @@ torchvision
 transformers
 huggingface_hub
 numpy
-Pillow
-scikit-learn
-lime
+pillow
 opencv-python-headless
-safetensors
+lime
