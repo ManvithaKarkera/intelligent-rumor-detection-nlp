@@ -1091,217 +1091,217 @@ st.markdown(
     # RIGHT — INFERENCE REPORT
     # ========================================================
 
-    with right_col:
-        result = st.session_state.last_result
+with right_col:
+    result = st.session_state.last_result
+
+    st.markdown(
+        """
+        <div class="result-card">
+            <span class="live-badge">● LIVE</span>
+            <div class="result-title">
+                Inference Report
+            </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if result is None:
+        prediction = "—"
+        confidence = "—"
+        model_name = "Waiting for input"
+        processing_time = "—"
+        rumor_probability = 0.0
+        normal_probability = 0.0
+    else:
+        prediction = result["prediction"]
+        confidence = f"{result['confidence'] * 100:.2f}%"
+        model_name = result["model"]
+        processing_time = (
+            f"{result['processing_time'] / 1000:.1f} s"
+        )
+        rumor_probability = result["rumor"]
+        normal_probability = result["non_rumor"]
+
+    metric1, metric2 = st.columns(2)
+
+    with metric1:
+        prediction_class = (
+            "rumor-value"
+            if (
+                "Rumor" in prediction
+                and "Non" not in prediction
+            )
+            else "normal-value"
+        )
 
         st.markdown(
-            """
-            <div class="result-card">
-                <span class="live-badge">● LIVE</span>
-                <div class="result-title">
-                    Inference Report
+            f"""
+            <div class="metric-box">
+                <div class="metric-label">
+                    Prediction
                 </div>
+                <div class="metric-value {prediction_class}">
+                    {prediction}
+                </div>
+            </div>
             """,
             unsafe_allow_html=True,
         )
 
-        if result is None:
-            prediction = "—"
-            confidence = "—"
-            model_name = "Waiting for input"
-            processing_time = "—"
-            rumor_probability = 0.0
-            normal_probability = 0.0
-        else:
-            prediction = result["prediction"]
-            confidence = f"{result['confidence'] * 100:.2f}%"
-            model_name = result["model"]
-            processing_time = (
-                f"{result['processing_time'] / 1000:.1f} s"
-            )
-            rumor_probability = result["rumor"]
-            normal_probability = result["non_rumor"]
-
-        metric1, metric2 = st.columns(2)
-
-        with metric1:
-            prediction_class = (
-                "rumor-value"
-                if (
-                    "Rumor" in prediction
-                    and "Non" not in prediction
-                )
-                else "normal-value"
-            )
-
-            st.markdown(
-                f"""
-                <div class="metric-box">
-                    <div class="metric-label">
-                        Prediction
-                    </div>
-                    <div class="metric-value {prediction_class}">
-                        {prediction}
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-        with metric2:
-            st.markdown(
-                f"""
-                <div class="metric-box">
-                    <div class="metric-label">
-                        Confidence
-                    </div>
-                    <div class="metric-value">
-                        {confidence}
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
+    with metric2:
         st.markdown(
             f"""
+            <div class="metric-box">
+                <div class="metric-label">
+                    Confidence
+                </div>
+                <div class="metric-value">
+                    {confidence}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown(
+        f"""
+        <div style="
+            margin-top:13px;
+            padding-bottom:9px;
+            border-bottom:1px solid #e2e8f0;
+            font-size:12px;
+        ">
             <div style="
-                margin-top:13px;
-                padding-bottom:9px;
-                border-bottom:1px solid #e2e8f0;
-                font-size:12px;
+                display:flex;
+                justify-content:space-between;
+                margin-bottom:8px;
             ">
-                <div style="
-                    display:flex;
-                    justify-content:space-between;
-                    margin-bottom:8px;
-                ">
-                    <span style="color:#64748b;">
-                        Model Used
-                    </span>
-                    <b style="color:#0f172a;">
-                        {model_name}
-                    </b>
-                </div>
-
-                <div style="
-                    display:flex;
-                    justify-content:space-between;
-                ">
-                    <span style="color:#64748b;">
-                        Process Time
-                    </span>
-                    <b style="color:#0f172a;">
-                        {processing_time}
-                    </b>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        st.markdown(
-            """
-            <div class="prob-title">
-                Probability Distribution
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        st.markdown(
-            f"""
-            <div class="prob-row">
-                <div class="prob-label">
-                    <span>Rumor Class</span>
-                    <span>{rumor_probability:.3f}</span>
-                </div>
-                <div class="prob-track">
-                    <div class="prob-rumor"
-                         style="width:{rumor_probability * 100:.2f}%">
-                    </div>
-                </div>
+                <span style="color:#64748b;">
+                    Model Used
+                </span>
+                <b style="color:#0f172a;">
+                    {model_name}
+                </b>
             </div>
 
-            <div class="prob-row">
-                <div class="prob-label">
-                    <span>Non-Rumor Class</span>
-                    <span>{normal_probability:.3f}</span>
+            <div style="
+                display:flex;
+                justify-content:space-between;
+            ">
+                <span style="color:#64748b;">
+                    Process Time
+                </span>
+                <b style="color:#0f172a;">
+                    {processing_time}
+                </b>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
+        <div class="prob-title">
+            Probability Distribution
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        f"""
+        <div class="prob-row">
+            <div class="prob-label">
+                <span>Rumor Class</span>
+                <span>{rumor_probability:.3f}</span>
+            </div>
+            <div class="prob-track">
+                <div class="prob-rumor"
+                     style="width:{rumor_probability * 100:.2f}%">
                 </div>
-                <div class="prob-track">
-                    <div class="prob-normal"
-                         style="width:{normal_probability * 100:.2f}%">
-                    </div>
+            </div>
+        </div>
+
+        <div class="prob-row">
+            <div class="prob-label">
+                <span>Non-Rumor Class</span>
+                <span>{normal_probability:.3f}</span>
+            </div>
+            <div class="prob-track">
+                <div class="prob-normal"
+                     style="width:{normal_probability * 100:.2f}%">
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if result is None:
+        warning_text = "No analysis performed yet."
+        warning_class = "domain-warning"
+    elif result["domain_warning"]:
+        warning_text = "⚠️ " + result["domain_warning"]
+        warning_class = "domain-warning"
+    else:
+        warning_text = (
+            "✓ No domain-shift concerns detected "
+            "for this input."
         )
+        warning_class = "domain-ok"
 
-        if result is None:
-            warning_text = "No analysis performed yet."
-            warning_class = "domain-warning"
-        elif result["domain_warning"]:
-            warning_text = "⚠️ " + result["domain_warning"]
-            warning_class = "domain-warning"
-        else:
-            warning_text = (
-                "✓ No domain-shift concerns detected "
-                "for this input."
-            )
-            warning_class = "domain-ok"
+    st.markdown(
+        f"""
+        <div class="{warning_class}">
+            {warning_text}
+        </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        st.markdown(
-            f"""
-            <div class="{warning_class}">
-                {warning_text}
-            </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+# ========================================================
+# EXAMPLES
+# ========================================================
 
-    # ========================================================
-    # EXAMPLES
-    # ========================================================
+st.markdown("<br>", unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+with st.expander(
+    "🌐 English examples",
+    expanded=False,
+):
+    st.markdown(
+        '<div class="example-title">☷ Examples</div>',
+        unsafe_allow_html=True,
+    )
 
-    with st.expander(
-        "🌐 English examples",
-        expanded=False,
-    ):
-        st.markdown(
-            '<div class="example-title">☷ Examples</div>',
-            unsafe_allow_html=True,
-        )
+    for i, example in enumerate(english_examples):
+        if st.button(
+            example,
+            key=f"eng_{i}",
+            use_container_width=True,
+        ):
+            st.session_state.last_text = example
+            st.rerun()
 
-        for i, example in enumerate(english_examples):
-            if st.button(
-                example,
-                key=f"eng_{i}",
-                use_container_width=True,
-            ):
-                st.session_state.last_text = example
-                st.rerun()
+with st.expander(
+    "🌏 Hindi / Kannada / Tamil / Telugu / Malayalam examples",
+    expanded=False,
+):
+    st.markdown(
+        '<div class="example-title">☷ Examples</div>',
+        unsafe_allow_html=True,
+    )
 
-    with st.expander(
-        "🌏 Hindi / Kannada / Tamil / Telugu / Malayalam examples",
-        expanded=False,
-    ):
-        st.markdown(
-            '<div class="example-title">☷ Examples</div>',
-            unsafe_allow_html=True,
-        )
-
-        for i, example in enumerate(indian_examples):
-            if st.button(
-                example,
-                key=f"ind_{i}",
-                use_container_width=True,
-            ):
-                st.session_state.last_text = example
-                st.rerun()
+    for i, example in enumerate(indian_examples):
+        if st.button(
+            example,
+            key=f"ind_{i}",
+            use_container_width=True,
+        ):
+            st.session_state.last_text = example
+            st.rerun()
 
 
 # ============================================================
@@ -1309,97 +1309,97 @@ st.markdown(
 # ============================================================
 
 with tab_explain:
-    result = st.session_state.last_result
+result = st.session_state.last_result
 
-    if result is None:
-        st.info(
-            "Run an analysis first. LIME and Grad-CAM "
-            "explanations will appear here."
+if result is None:
+    st.info(
+        "Run an analysis first. LIME and Grad-CAM "
+        "explanations will appear here."
+    )
+else:
+    if result["lime_html"]:
+        st.markdown(
+            """
+            <div class="explanation-card">
+                <div class="result-title">
+                    🔎 Text Explanation — LIME
+                </div>
+            """,
+            unsafe_allow_html=True,
         )
-    else:
-        if result["lime_html"]:
-            st.markdown(
-                """
-                <div class="explanation-card">
-                    <div class="result-title">
-                        🔎 Text Explanation — LIME
-                    </div>
-                """,
-                unsafe_allow_html=True,
-            )
 
-            st.markdown(
-                result["lime_html"],
-                unsafe_allow_html=True,
-            )
+        st.markdown(
+            result["lime_html"],
+            unsafe_allow_html=True,
+        )
 
-            st.markdown(
-                """
+        st.markdown(
+            """
+            <div style="
+                margin-top:10px;
+                font-size:12px;
+                color:#64748b;
+            ">
+                <b style="color:#dc2626;">Red</b>
+                = pushes toward Rumor
+                &nbsp;&nbsp;&nbsp;
+                <b style="color:#087f79;">Green</b>
+                = pushes toward Non-Rumor
+            </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    if result["plain_explanation"]:
+        st.markdown(
+            f"""
+            <div class="explanation-card">
+                <div class="result-title">
+                    📝 Explanation
+                </div>
                 <div style="
-                    margin-top:10px;
-                    font-size:12px;
-                    color:#64748b;
+                    font-size:11px;
+                    color:#334155;
+                    line-height:1.7;
                 ">
-                    <b style="color:#dc2626;">Red</b>
-                    = pushes toward Rumor
-                    &nbsp;&nbsp;&nbsp;
-                    <b style="color:#087f79;">Green</b>
-                    = pushes toward Non-Rumor
+                    {result["plain_explanation"]}
                 </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-        if result["plain_explanation"]:
-            st.markdown(
-                f"""
-                <div class="explanation-card">
-                    <div class="result-title">
-                        📝 Explanation
-                    </div>
-                    <div style="
-                        font-size:11px;
-                        color:#334155;
-                        line-height:1.7;
-                    ">
-                        {result["plain_explanation"]}
-                    </div>
+    if result["gradcam"] is not None:
+        st.markdown(
+            """
+            <div class="explanation-card">
+                <div class="result-title">
+                    🔥 Image Explanation — Grad-CAM
                 </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            """,
+            unsafe_allow_html=True,
+        )
 
-        if result["gradcam"] is not None:
-            st.markdown(
-                """
-                <div class="explanation-card">
-                    <div class="result-title">
-                        🔥 Image Explanation — Grad-CAM
-                    </div>
-                """,
-                unsafe_allow_html=True,
-            )
+        st.image(
+            result["gradcam"],
+            use_container_width=True,
+        )
 
-            st.image(
-                result["gradcam"],
-                use_container_width=True,
-            )
-
-            st.markdown(
-                """
-                <div style="
-                    font-size:12px;
-                    color:#64748b;
-                    margin-top:5px;
-                ">
-                    Highlighted regions represent image
-                    areas contributing to the prediction.
-                </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+        st.markdown(
+            """
+            <div style="
+                font-size:12px;
+                color:#64748b;
+                margin-top:5px;
+            ">
+                Highlighted regions represent image
+                areas contributing to the prediction.
+            </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 # ============================================================
@@ -1407,36 +1407,36 @@ with tab_explain:
 # ============================================================
 
 if clear_button:
-    st.session_state.last_result = None
-    st.session_state.last_text = ""
-    st.rerun()
+st.session_state.last_result = None
+st.session_state.last_text = ""
+st.rerun()
 
 
 if analyze_button:
-    if not text_input.strip() and uploaded_image is None:
-        st.warning(
-            "Please enter text, upload an image, "
-            "or provide both."
-        )
-    else:
-        with st.spinner("Analyzing content..."):
-            try:
-                result = run_inference(
-                    text_input,
-                    uploaded_image,
-                    models_data,
-                )
+if not text_input.strip() and uploaded_image is None:
+    st.warning(
+        "Please enter text, upload an image, "
+        "or provide both."
+    )
+else:
+    with st.spinner("Analyzing content..."):
+        try:
+            result = run_inference(
+                text_input,
+                uploaded_image,
+                models_data,
+            )
 
-                st.session_state.last_result = result
-                st.session_state.last_text = text_input
+            st.session_state.last_result = result
+            st.session_state.last_text = text_input
 
-                st.rerun()
+            st.rerun()
 
-            except Exception as e:
-                st.error(
-                    "An error occurred during inference."
-                )
-                st.exception(e)
+        except Exception as e:
+            st.error(
+                "An error occurred during inference."
+            )
+            st.exception(e)
 
 
 # ============================================================
@@ -1444,16 +1444,16 @@ if analyze_button:
 # ============================================================
 
 st.markdown(
-    """
-    <div style="
-        text-align:center;
-        color:#94a3b8;
-        font-size:12px;
-        padding:20px 0 5px 0;
-    ">
-        Intelligent Rumor Detection using BERT,
-        mBERT, ResNet50 and Multimodal Fusion
-    </div>
-    """,
-    unsafe_allow_html=True,
+"""
+<div style="
+    text-align:center;
+    color:#94a3b8;
+    font-size:12px;
+    padding:20px 0 5px 0;
+">
+    Intelligent Rumor Detection using BERT,
+    mBERT, ResNet50 and Multimodal Fusion
+</div>
+""",
+unsafe_allow_html=True,
 )
