@@ -789,243 +789,139 @@ def run_inference(text, uploaded_image, models_data):
 st.markdown(
     """
     <style>
-    .stApp {
-        background: #eef2f7;
-    }
+    .stApp { background: #f3f6fa; }
 
     .block-container {
-        max-width: 1200px;
-        padding-top: 1rem;
-        padding-bottom: 2rem;
+        max-width: 1250px;
+        padding-top: 1.5rem;
+        padding-bottom: 2.5rem;
     }
 
+    /* HEADER */
     .app-header {
-        background: linear-gradient(
-            100deg,
-            #078b87 0%,
-            #405bd1 70%,
-            #5b57ed 100%
-        );
+        background: linear-gradient(105deg, #078b87 0%, #405bd1 68%, #5b57ed 100%);
         color: white;
-        padding: 13px 20px;
-        border-radius: 10px 10px 0 0;
+        padding: 16px 22px;
+        border-radius: 12px 12px 0 0;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        font-size: 15px;
-        font-weight: 700;
+        gap: 18px;
     }
 
     .header-title {
         display: flex;
         align-items: center;
-        gap: 7px;
+        gap: 9px;
+        font-size: 20px;
+        font-weight: 750;
     }
 
-    .shield {
-        font-size: 17px;
-    }
+    .shield { font-size: 22px; }
 
     .language-pills {
         display: flex;
-        gap: 5px;
+        gap: 6px;
         flex-wrap: wrap;
+        justify-content: flex-end;
     }
 
     .language-pill {
         border: 1px solid rgba(255,255,255,0.45);
         background: rgba(255,255,255,0.14);
-        border-radius: 12px;
-        padding: 3px 8px;
-        font-size: 9px;
-        font-weight: 500;
+        border-radius: 14px;
+        padding: 5px 9px;
+        font-size: 11px;
+        font-weight: 600;
     }
 
+    /* STATUS */
     .status-container {
         background: white;
         border: 1px solid #d8e0ea;
-        padding: 9px;
-        margin-top: 22px;
-        border-radius: 7px;
+        padding: 12px;
+        margin-top: 14px;
+        border-radius: 9px;
         display: flex;
         justify-content: center;
-        gap: 7px;
+        gap: 8px;
         flex-wrap: wrap;
     }
 
     .status-pill {
         border: 1px solid #dce3eb;
         background: #f8fafc;
-        border-radius: 6px;
-        padding: 4px 9px;
-        font-size: 9px;
+        border-radius: 7px;
+        padding: 6px 11px;
+        font-size: 12px;
         color: #334155;
     }
 
     .status-dot {
         color: #08a86b;
-        font-size: 10px;
-    }
-
-    .section-title {
         font-size: 12px;
-        font-weight: 700;
-        color: #0f172a;
-        margin-bottom: 4px;
     }
 
-    .section-subtitle {
-        font-size: 8px;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 8px;
-    }
-
-    .main-card,
-    .result-card,
-    .explanation-card {
+    /* CARDS */
+    .main-card, .result-card, .explanation-card {
         background: white;
         border: 1px solid #d9e2ec;
-        border-radius: 10px;
-        padding: 14px;
-        box-shadow: 0 1px 3px rgba(15,23,42,0.05);
-    }
-
-    .result-card {
-        min-height: 330px;
+        border-radius: 11px;
+        padding: 18px;
+        box-shadow: 0 2px 7px rgba(15,23,42,0.05);
     }
 
     .inner-card {
         background: #f8fafc;
         border: 1px solid #d9e2ec;
         border-radius: 9px;
-        padding: 12px;
+        padding: 14px;
+        margin-bottom: 13px;
+    }
+
+    .section-title {
+        font-size: 17px;
+        font-weight: 750;
+        color: #0f172a;
+        margin-bottom: 5px;
+    }
+
+    .section-subtitle {
+        font-size: 11px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
         margin-bottom: 10px;
     }
 
-    .live-badge {
-        float: right;
-        background: #ecfdf5;
-        border: 1px solid #86efac;
-        color: #059669;
-        border-radius: 10px;
-        padding: 3px 9px;
-        font-size: 8px;
-        font-weight: 600;
+    /* INPUTS */
+    textarea {
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        font-size: 14px !important;
+        line-height: 1.5 !important;
     }
 
-    .result-title {
-        font-size: 13px;
-        font-weight: 700;
-        color: #0f172a;
-        margin-bottom: 15px;
+    [data-testid="stFileUploader"] {
+        background: white;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 10px;
     }
 
-    .metric-box {
-        background: #f8fafc;
-        border: 1px solid #d9e2ec;
-        border-radius: 7px;
-        padding: 9px 10px;
-        min-height: 60px;
+    [data-testid="stFileUploader"] label,
+    [data-testid="stFileUploader"] small {
+        font-size: 12px !important;
     }
 
-    .metric-label {
-        font-size: 8px;
-        color: #64748b;
-        text-transform: uppercase;
-    }
-
-    .metric-value {
-        font-size: 15px;
-        font-weight: 700;
-        margin-top: 4px;
-        color: #111827;
-    }
-
-    .rumor-value {
-        color: #dc2626;
-    }
-
-    .normal-value {
-        color: #087f79;
-    }
-
-    .prob-title {
-        font-size: 8px;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        margin-top: 15px;
-        margin-bottom: 8px;
-    }
-
-    .prob-row {
-        margin-bottom: 8px;
-    }
-
-    .prob-label {
-        display: flex;
-        justify-content: space-between;
-        font-size: 9px;
-        color: #334155;
-        margin-bottom: 3px;
-    }
-
-    .prob-track {
-        height: 6px;
-        background: #dce3eb;
-        border-radius: 5px;
-        overflow: hidden;
-    }
-
-    .prob-rumor {
-        height: 100%;
-        background: #dc2626;
-        border-radius: 5px;
-    }
-
-    .prob-normal {
-        height: 100%;
-        background: #087f79;
-        border-radius: 5px;
-    }
-
-    .domain-ok {
-        background: #f0fdf4;
-        border: 1px solid #86efac;
-        color: #15803d;
-        border-radius: 6px;
-        padding: 7px 9px;
-        font-size: 8px;
-        margin-top: 10px;
-    }
-
-    .domain-warning {
-        background: #fff7ed;
-        border: 1px solid #fdba74;
-        color: #c2410c;
-        border-radius: 6px;
-        padding: 7px 9px;
-        font-size: 8px;
-        margin-top: 10px;
-    }
-
-    .word-pill {
-        display: inline-block;
-        padding: 4px 8px;
-        margin: 3px;
-        border-radius: 5px;
-        font-size: 11px;
-        color: #1e293b;
-    }
-
+    /* BUTTONS */
     div.stButton > button {
-        border-radius: 6px;
+        border-radius: 7px;
         border: 1px solid #d1d9e2;
-        font-size: 11px;
-        font-weight: 600;
-        min-height: 38px;
+        font-size: 13px;
+        font-weight: 650;
+        min-height: 42px;
+        padding: 7px 12px;
     }
 
     div.stButton > button[kind="primary"] {
@@ -1039,265 +935,157 @@ st.markdown(
         color: white;
     }
 
-    [data-testid="stFileUploader"] {
-        background: white;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        padding: 8px;
+    /* RESULT */
+    .result-card { min-height: 420px; }
+
+    .live-badge {
+        float: right;
+        background: #ecfdf5;
+        border: 1px solid #86efac;
+        color: #059669;
+        border-radius: 12px;
+        padding: 5px 10px;
+        font-size: 10px;
+        font-weight: 700;
     }
 
-    #MainMenu,
-    footer,
-    header {
-        visibility: hidden;
+    .result-title {
+        font-size: 18px;
+        font-weight: 750;
+        color: #0f172a;
+        margin-bottom: 16px;
+    }
+
+    .metric-box {
+        background: #f8fafc;
+        border: 1px solid #d9e2ec;
+        border-radius: 8px;
+        padding: 12px;
+        min-height: 76px;
+    }
+
+    .metric-label {
+        font-size: 11px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .metric-value {
+        font-size: 19px;
+        font-weight: 750;
+        margin-top: 5px;
+        color: #111827;
+        word-break: break-word;
+    }
+
+    .rumor-value { color: #dc2626; }
+    .normal-value { color: #087f79; }
+
+    /* PROBABILITY */
+    .prob-title {
+        font-size: 12px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 18px;
+        margin-bottom: 10px;
+        font-weight: 650;
+    }
+
+    .prob-row { margin-bottom: 12px; }
+
+    .prob-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #334155;
+        margin-bottom: 5px;
+    }
+
+    .prob-track {
+        height: 8px;
+        background: #dce3eb;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .prob-rumor {
+        height: 100%;
+        background: #dc2626;
+        border-radius: 6px;
+    }
+
+    .prob-normal {
+        height: 100%;
+        background: #087f79;
+        border-radius: 6px;
+    }
+
+    /* WARNINGS */
+    .domain-ok, .domain-warning {
+        border-radius: 7px;
+        padding: 9px 11px;
+        font-size: 11px;
+        margin-top: 12px;
+        line-height: 1.45;
+    }
+
+    .domain-ok {
+        background: #f0fdf4;
+        border: 1px solid #86efac;
+        color: #15803d;
+    }
+
+    .domain-warning {
+        background: #fff7ed;
+        border: 1px solid #fdba74;
+        color: #c2410c;
+    }
+
+    /* EXPLANATION */
+    .explanation-card { margin-top: 14px; }
+
+    .word-pill {
+        display: inline-block;
+        padding: 5px 9px;
+        margin: 3px;
+        border-radius: 6px;
+        font-size: 13px;
+        color: #1e293b;
+    }
+
+    /* EXAMPLES */
+    .example-title {
+        font-size: 13px;
+        color: #0f766e;
+        font-weight: 700;
+    }
+
+    .example-note {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 7px;
+    }
+
+    /* TABS */
+    button[data-baseweb="tab"] {
+        font-size: 13px !important;
+        font-weight: 650 !important;
+    }
+
+    #MainMenu, footer, header { visibility: hidden; }
+
+    @media (max-width: 800px) {
+        .header-title { font-size: 17px; }
+        .language-pill { font-size: 10px; padding: 4px 7px; }
+        .status-pill { font-size: 11px; }
+        .metric-value { font-size: 16px; }
     }
     </style>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
-
-
-# ============================================================
-# SESSION STATE
-# ============================================================
-
-if "last_result" not in st.session_state:
-    st.session_state.last_result = None
-
-if "last_text" not in st.session_state:
-    st.session_state.last_text = ""
-
-if "run_example" not in st.session_state:
-    st.session_state.run_example = None
-
-
-# ============================================================
-# HEADER
-# ============================================================
-
-st.markdown(
-    """
-    <div class="app-header">
-        <div class="header-title">
-            <span class="shield">🛡️</span>
-            <span>Intelligent Rumor Detection System</span>
-        </div>
-
-        <div class="language-pills">
-            <span class="language-pill">EN EN</span>
-            <span class="language-pill">हि HI</span>
-            <span class="language-pill">ಕಂ KN</span>
-            <span class="language-pill">த TA</span>
-            <span class="language-pill">మా TE</span>
-            <span class="language-pill">മല ML</span>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-# ============================================================
-# LOAD MODELS
-# ============================================================
-
-with st.spinner("Loading trained models..."):
-    try:
-        models_data = load_all_models()
-        models_loaded = models_data is not None
-    except Exception as e:
-        models_data = None
-        models_loaded = False
-
-st.markdown(
-    """
-    <div class="status-container">
-        <span class="status-pill">
-            <span class="status-dot">●</span>
-            English BERT: Ready
-        </span>
-        <span class="status-pill">
-            <span class="status-dot">●</span>
-            Multilingual (mBERT): Ready
-        </span>
-        <span class="status-pill">
-            <span class="status-dot">●</span>
-            Image (ResNet50): Ready
-        </span>
-        <span class="status-pill">
-            <span class="status-dot">●</span>
-            Multimodal Fusion: Ready
-        </span>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-if not models_loaded:
-    st.error(
-        "The trained models could not be loaded. "
-        "Check the Streamlit deployment logs and make sure "
-        "the Hugging Face repository is public and contains "
-        "the four uploaded model artifacts."
-    )
-    st.stop()
-
-
-# ============================================================
-# TABS
-# ============================================================
-
-tab_analyze, tab_explain = st.tabs(
-    ["Analyze Content", "Explainability"]
-)
-
-
-# ============================================================
-# EXAMPLES
-# ============================================================
-
-english_examples = [
-    "BREAKING: New studies suggest eating garlic prevents virus completely.",
-    "Government launches new education policy changes for secondary schools.",
-    "Cash withdrawal limit at ATMs will be reduced to ₹2000 per day.",
-    "ISRO successfully launches Chandrayaan-4 mission ahead of schedule.",
-]
-
-indian_examples = [
-    "कोरोना वैक्सीन लेने से 5 साल के अंदर मौत हो सकती है",
-    "व्हाट्सएप पर वायरल: नया आधार कार्ड नियम आज से लागू",
-    "ಎಲ್ಲಾ ಬ್ಯಾಂಕುಗಳು ಇಂದಿನಿಂದ ಹೊಸ ನಿಯಮ ಜಾರಿಗೆ ತರಲಿವೆ",
-    "தமிழ்நாட்டில் நாளை முதல் பள்ளிகளுக்கு புதிய விதிமுறைகள்",
-    "ആശുപത്രിയിൽ കൊവിഡ് മരുന്നുകൾ സൗജന്യമായി നൽകും",
-]
-
-
-# ============================================================
-# ANALYZE TAB
-# ============================================================
-
-with tab_analyze:
-    left_col, right_col = st.columns(
-        [1.03, 1],
-        gap="medium",
-    )
-
-    with left_col:
-        st.markdown(
-            """
-            <div class="main-card">
-                <div class="inner-card">
-                    <div class="section-title">
-                        📊 Input Analysis Canvas
-                    </div>
-                    <div class="section-subtitle">
-                        Content Payload
-                    </div>
-                </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        lang_cols = st.columns(6)
-
-        for col, lang in zip(
-            lang_cols,
-            ["EN", "HI", "KN", "TA", "TE", "ML"],
-        ):
-            with col:
-                st.markdown(
-                    f"""
-                    <div style="
-                        text-align:center;
-                        border:1px solid #cbd5e1;
-                        background:#f8fafc;
-                        border-radius:5px;
-                        padding:4px;
-                        font-size:9px;
-                        color:#334155;
-                    ">
-                        {lang}
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-        text_input = st.text_area(
-            "Content",
-            value=st.session_state.last_text,
-            height=115,
-            label_visibility="collapsed",
-            placeholder=(
-                "Paste rumor text, social media headlines, "
-                "or claims here. Multi-script detection "
-                "(Hindi, Kannada, etc.) is active..."
-            ),
-            key="text_input",
-        )
-
-        st.markdown(
-            """
-            <div class="section-subtitle"
-                 style="margin-top:8px;">
-                Multimodal Context (Optional)
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        uploaded_image = st.file_uploader(
-            "Upload image",
-            type=["jpg", "jpeg", "png", "webp"],
-            label_visibility="collapsed",
-            key="uploaded_image",
-        )
-
-        if uploaded_image is not None:
-            try:
-                preview = Image.open(uploaded_image).convert("RGB")
-                st.image(
-                    preview,
-                    use_container_width=True,
-                )
-            except Exception:
-                st.error("Could not read the uploaded image.")
-        else:
-            st.markdown(
-                """
-                <div style="
-                    height:150px;
-                    border:1px solid #cbd5e1;
-                    border-radius:6px;
-                    background:white;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    color:#94a3b8;
-                    font-size:10px;
-                ">
-                    Upload an image for multimodal analysis
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-        clear_col, analyze_col = st.columns(2)
-
-        with clear_col:
-            clear_button = st.button(
-                "🗑 Clear",
-                use_container_width=True,
-            )
-
-        with analyze_col:
-            analyze_button = st.button(
-                "⚡ Analyze",
-                type="primary",
-                use_container_width=True,
-            )
-
-        st.markdown("</div>", unsafe_allow_html=True)
 
     # ========================================================
     # RIGHT — INFERENCE REPORT
@@ -1381,7 +1169,7 @@ with tab_analyze:
                 margin-top:13px;
                 padding-bottom:9px;
                 border-bottom:1px solid #e2e8f0;
-                font-size:9px;
+                font-size:12px;
             ">
                 <div style="
                     display:flex;
@@ -1549,7 +1337,7 @@ with tab_explain:
                 """
                 <div style="
                     margin-top:10px;
-                    font-size:9px;
+                    font-size:12px;
                     color:#64748b;
                 ">
                     <b style="color:#dc2626;">Red</b>
@@ -1601,7 +1389,7 @@ with tab_explain:
             st.markdown(
                 """
                 <div style="
-                    font-size:9px;
+                    font-size:12px;
                     color:#64748b;
                     margin-top:5px;
                 ">
@@ -1660,7 +1448,7 @@ st.markdown(
     <div style="
         text-align:center;
         color:#94a3b8;
-        font-size:9px;
+        font-size:12px;
         padding:20px 0 5px 0;
     ">
         Intelligent Rumor Detection using BERT,
