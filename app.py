@@ -34,7 +34,7 @@ st.set_page_config(
 
 # IMPORTANT:
 # Replace this with your actual Hugging Face model repository.
-HF_REPO_ID = "ManvithaKarkera/intelligent-rumor-detection-nlp"
+HF_REPO_ID = "ManvithaKarkera/rumor-detection-models"
 
 CLASS_NAMES = ["Non-Rumor", "Rumor"]
 
