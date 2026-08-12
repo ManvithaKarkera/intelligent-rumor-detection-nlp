@@ -627,20 +627,19 @@ lime_explainer = LimeTextExplainer(
 )
 
 
-def render_lime_html(
-    word_scores
-):
+def render_lime_html(word_scores):
 
     if not word_scores:
-
-        return "No explanation available."
-
-    spans = []
+        return ""
 
     max_abs = max(
         abs(score)
         for _, score in word_scores
     ) or 1.0
+
+    html_parts = [
+        '<div style="line-height:2.2;">'
+    ]
 
     for word, score in word_scores:
 
@@ -650,50 +649,38 @@ def render_lime_html(
         )
 
         if score > 0:
-
             background = (
-                f"rgba(220,38,38,{intensity:.2f})"
+                f"rgba(220,38,38,"
+                f"{max(0.08, intensity * 0.45):.2f})"
             )
-
         else:
-
             background = (
-                f"rgba(22,163,74,{intensity:.2f})"
+                f"rgba(8,127,121,"
+                f"{max(0.08, intensity * 0.45):.2f})"
             )
 
-        spans.append(
+        safe_word = (
+            str(word)
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+        )
+
+        html_parts.append(
             f"""
-            <span style="
-                background:{background};
-                padding:3px 7px;
-                margin:2px;
-                border-radius:5px;
-                display:inline-block;
-            ">
-                {word}
+            <span class="word-pill"
+                  style="
+                    background:{background};
+                    border:1px solid rgba(148,163,184,0.25);
+                  ">
+                {safe_word}
             </span>
             """
         )
 
-    legend = """
-    <div style="
-        margin-top:12px;
-        font-size:12px;
-        color:#64748b;
-    ">
-        <b>Red</b> = pushes toward Rumor
-        &nbsp;&nbsp;&nbsp;
-        <b>Green</b> = pushes toward Non-Rumor
-    </div>
-    """
+    html_parts.append("</div>")
 
-    return (
-        '<div style="line-height:2.2;">'
-        + " ".join(spans)
-        + "</div>"
-        + legend
-    )
-
+    return "".join(html_parts)
 
 def generate_plain_explanation(
     word_scores,
@@ -1077,137 +1064,1208 @@ def initialize():
 # USER INTERFACE
 # ============================================================
 
-st.title("🛡️ Intelligent Rumor Detection System")
+# ============================================================
+# GRADIO-STYLE STREAMLIT USER INTERFACE
+# ============================================================
+
+# ------------------------------------------------------------
+# CUSTOM CSS
+# ------------------------------------------------------------
 
 st.markdown(
     """
-    **BERT • mBERT • ResNet50 • Multimodal Fusion •
-    LIME • Grad-CAM**
+    <style>
+
+    /* ---------- PAGE ---------- */
+
+    .stApp {
+        background: #eef2f7;
+    }
+
+    .block-container {
+        max-width: 1200px;
+        padding-top: 1rem;
+        padding-bottom: 2rem;
+    }
+
+
+    /* ---------- HEADER ---------- */
+
+    .app-header {
+        background: linear-gradient(
+            100deg,
+            #078b87 0%,
+            #405bd1 70%,
+            #5b57ed 100%
+        );
+
+        color: white;
+        padding: 13px 20px;
+        border-radius: 10px 10px 0 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .shield {
+        font-size: 17px;
+    }
+
+    .language-pills {
+        display: flex;
+        gap: 5px;
+    }
+
+    .language-pill {
+        border: 1px solid rgba(255,255,255,0.45);
+        background: rgba(255,255,255,0.14);
+        border-radius: 12px;
+        padding: 3px 8px;
+        font-size: 9px;
+        font-weight: 500;
+    }
+
+
+    /* ---------- MODEL STATUS ---------- */
+
+    .status-container {
+        background: white;
+        border: 1px solid #d8e0ea;
+        padding: 9px;
+        margin-top: 22px;
+        border-radius: 7px;
+
+        display: flex;
+        justify-content: center;
+        gap: 7px;
+        flex-wrap: wrap;
+    }
+
+    .status-pill {
+        border: 1px solid #dce3eb;
+        background: #f8fafc;
+        border-radius: 6px;
+        padding: 4px 9px;
+        font-size: 9px;
+        color: #334155;
+    }
+
+    .status-dot {
+        color: #08a86b;
+        font-size: 10px;
+    }
+
+
+    /* ---------- NAVIGATION ---------- */
+
+    .custom-nav {
+        margin-top: 8px;
+
+        background: linear-gradient(
+            90deg,
+            #078b87 0%,
+            #405bd1 70%,
+            #5148e8 100%
+        );
+
+        border-radius: 0 0 10px 10px;
+
+        color: white;
+        padding: 8px 18px;
+
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .nav-active {
+        margin-right: 25px;
+        color: white;
+        font-weight: 700;
+    }
+
+    .nav-inactive {
+        color: rgba(255,255,255,0.72);
+    }
+
+
+    /* ---------- MAIN CARDS ---------- */
+
+    .main-card {
+        background: white;
+        border: 1px solid #d9e2ec;
+        border-radius: 10px;
+
+        padding: 12px;
+
+        box-shadow:
+            0 1px 3px rgba(15,23,42,0.05);
+    }
+
+    .inner-card {
+        background: #f8fafc;
+        border: 1px solid #d9e2ec;
+        border-radius: 9px;
+        padding: 12px;
+    }
+
+
+    /* ---------- SECTION TITLES ---------- */
+
+    .section-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0f172a;
+
+        margin-bottom: 4px;
+    }
+
+    .section-subtitle {
+        font-size: 8px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        margin-bottom: 8px;
+    }
+
+
+    /* ---------- INPUT ---------- */
+
+    textarea {
+        border-radius: 6px !important;
+        border: 1px solid #cbd5e1 !important;
+    }
+
+    [data-testid="stFileUploader"] {
+        background: white;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 8px;
+    }
+
+
+    /* ---------- RESULT ---------- */
+
+    .result-card {
+        background: white;
+        border: 1px solid #d9e2ec;
+        border-radius: 10px;
+        padding: 14px;
+        min-height: 330px;
+    }
+
+    .live-badge {
+        float: right;
+
+        background: #ecfdf5;
+        border: 1px solid #86efac;
+        color: #059669;
+
+        border-radius: 10px;
+        padding: 3px 9px;
+
+        font-size: 8px;
+        font-weight: 600;
+    }
+
+    .result-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 15px;
+    }
+
+    .metric-box {
+        background: #f8fafc;
+        border: 1px solid #d9e2ec;
+        border-radius: 7px;
+
+        padding: 9px 10px;
+        min-height: 60px;
+    }
+
+    .metric-label {
+        font-size: 8px;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+
+    .metric-value {
+        font-size: 15px;
+        font-weight: 700;
+        margin-top: 4px;
+        color: #111827;
+    }
+
+    .rumor-value {
+        color: #dc2626;
+    }
+
+    .normal-value {
+        color: #087f79;
+    }
+
+
+    /* ---------- PROBABILITY ---------- */
+
+    .prob-title {
+        font-size: 8px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-top: 15px;
+        margin-bottom: 8px;
+    }
+
+    .prob-row {
+        margin-bottom: 8px;
+    }
+
+    .prob-label {
+        display: flex;
+        justify-content: space-between;
+
+        font-size: 9px;
+        color: #334155;
+
+        margin-bottom: 3px;
+    }
+
+    .prob-track {
+        height: 6px;
+        background: #dce3eb;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .prob-rumor {
+        height: 100%;
+        background: #dc2626;
+        border-radius: 5px;
+    }
+
+    .prob-normal {
+        height: 100%;
+        background: #087f79;
+        border-radius: 5px;
+    }
+
+
+    /* ---------- WARNING ---------- */
+
+    .domain-ok {
+        background: #f0fdf4;
+        border: 1px solid #86efac;
+        color: #15803d;
+
+        border-radius: 6px;
+        padding: 7px 9px;
+
+        font-size: 8px;
+        margin-top: 10px;
+    }
+
+    .domain-warning {
+        background: #fff7ed;
+        border: 1px solid #fdba74;
+        color: #c2410c;
+
+        border-radius: 6px;
+        padding: 7px 9px;
+
+        font-size: 8px;
+        margin-top: 10px;
+    }
+
+
+    /* ---------- EXPLANATION ---------- */
+
+    .explanation-card {
+        background: white;
+        border: 1px solid #d9e2ec;
+        border-radius: 9px;
+
+        padding: 15px;
+        margin-top: 12px;
+    }
+
+    .word-pill {
+        display: inline-block;
+
+        padding: 4px 8px;
+        margin: 3px;
+
+        border-radius: 5px;
+
+        font-size: 11px;
+        color: #1e293b;
+    }
+
+
+    /* ---------- EXAMPLES ---------- */
+
+    .example-title {
+        font-size: 10px;
+        color: #0f766e;
+        font-weight: 600;
+    }
+
+    .example-note {
+        font-size: 9px;
+        color: #64748b;
+        margin-bottom: 6px;
+    }
+
+
+    /* ---------- BUTTONS ---------- */
+
+    div.stButton > button {
+        border-radius: 0;
+        border: 1px solid #d1d9e2;
+        font-size: 11px;
+        font-weight: 600;
+        min-height: 38px;
+    }
+
+    div.stButton > button[kind="primary"] {
+        background: #14b8a6;
+        color: white;
+        border: none;
+    }
+
+    div.stButton > button[kind="primary"]:hover {
+        background: #0d9488;
+        color: white;
+    }
+
+
+    /* ---------- HIDE STREAMLIT BRANDING ---------- */
+
+    #MainMenu {
+        visibility: hidden;
+    }
+
+    footer {
+        visibility: hidden;
+    }
+
+    header {
+        visibility: hidden;
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# ============================================================
+# HEADER
+# ============================================================
+
+st.markdown(
     """
-)
+    <div class="app-header">
 
-st.info(
-    "Enter text, upload an image, or provide both. "
-    "The system automatically selects the appropriate model."
-)
+        <div class="header-title">
+            <span class="shield">🛡️</span>
+            <span>Intelligent Rumor Detection System</span>
+        </div>
 
+        <div class="language-pills">
+            <span class="language-pill">EN EN</span>
+            <span class="language-pill">हि HI</span>
+            <span class="language-pill">ಕಂ KN</span>
+            <span class="language-pill">த TA</span>
+            <span class="language-pill">మా TE</span>
+            <span class="language-pill">മല ML</span>
+        </div>
 
-# ------------------------------------------------------------
-# Load models
-# ------------------------------------------------------------
-
-with st.spinner(
-    "Loading trained models from Hugging Face..."
-):
-
-    try:
-
-        models_data = initialize()
-
-        models_loaded = True
-
-    except Exception as e:
-
-        models_loaded = False
-
-        st.error(
-            "Unable to load the trained models."
-        )
-
-        st.exception(e)
-
-
-# ------------------------------------------------------------
-# Model status
-# ------------------------------------------------------------
-
-if models_loaded:
-
-    st.success(
-        "All four trained models are ready."
-    )
-
-
-# ------------------------------------------------------------
-# INPUTS
-# ------------------------------------------------------------
-
-col1, col2 = st.columns(2)
-
-with col1:
-
-    st.subheader("📝 Text Input")
-
-    text_input = st.text_area(
-        "Enter a social media post or news text",
-        height=220,
-        placeholder=(
-            "Example: Enter the claim or "
-            "social media post you want to analyze..."
-        )
-    )
-
-
-with col2:
-
-    st.subheader("🖼️ Image Input")
-
-    image_input = st.file_uploader(
-        "Upload an image",
-        type=[
-            "jpg",
-            "jpeg",
-            "png",
-            "webp"
-        ]
-    )
-
-    preview_image = None
-
-    if image_input is not None:
-
-        preview_image = Image.open(
-            image_input
-        ).convert("RGB")
-
-        st.image(
-            preview_image,
-            caption="Uploaded image",
-            use_container_width=True
-        )
-
-
-# ------------------------------------------------------------
-# Analyze
-# ------------------------------------------------------------
-
-st.divider()
-
-analyze_button = st.button(
-    "🔍 Analyze Content",
-    type="primary",
-    use_container_width=True
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
 
-if analyze_button:
+# ============================================================
+# MODEL STATUS
+# ============================================================
 
-    if not models_loaded:
+st.markdown(
+    """
+    <div class="status-container">
 
-        st.error(
-            "Models could not be loaded. "
-            "Please check the Hugging Face repository "
-            "and deployment logs."
+        <span class="status-pill">
+            <span class="status-dot">●</span>
+            English BERT: Ready
+        </span>
+
+        <span class="status-pill">
+            <span class="status-dot">●</span>
+            Multilingual (mBERT): Ready
+        </span>
+
+        <span class="status-pill">
+            <span class="status-dot">●</span>
+            Image (ResNet50): Ready
+        </span>
+
+        <span class="status-pill">
+            <span class="status-dot">●</span>
+            Multimodal Fusion: Ready
+        </span>
+
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# ============================================================
+# NAVIGATION
+# ============================================================
+
+tab_analyze, tab_explain = st.tabs(
+    [
+        "Analyze Content",
+        "Explainability"
+    ]
+)
+
+
+# ============================================================
+# EXAMPLE DATA
+# ============================================================
+
+english_examples = [
+    "BREAKING: New studies suggest eating garlic prevents virus completely.",
+    "Government launches new education policy changes for secondary schools.",
+    "Cash withdrawal limit at ATMs will be reduced to ₹2000 per day.",
+    "ISRO successfully launches Chandrayaan-4 mission ahead of schedule."
+]
+
+indian_examples = [
+    "कोरोना वैक्सीन लेने से 5 साल के अंदर मौत हो सकती है",
+    "व्हाट्सएप पर वायरल: नया आधार कार्ड नियम आज से लागू",
+    "ಎಲ್ಲಾ ಬ್ಯಾಂಕುಗಳು ಇಂದಿನಿಂದ ಹೊಸ ನಿಯಮ ಜಾರಿಗೆ ತರಲಿವೆ",
+    "தமிழ்நாட்டில் நாளை முதல் பள்ளிகளுக்கு புதிய விதிமுறைகள்",
+    "ആശുപത്രിയിൽ കൊവിഡ് മരുന്നുകൾ സൗജന്യമായി നൽകും"
+]
+
+
+# ============================================================
+# SESSION STATE
+# ============================================================
+
+if "last_result" not in st.session_state:
+
+    st.session_state.last_result = None
+
+
+if "last_text" not in st.session_state:
+
+    st.session_state.last_text = ""
+
+
+if "last_image" not in st.session_state:
+
+    st.session_state.last_image = None
+
+
+# ============================================================
+# ANALYZE TAB
+# ============================================================
+
+with tab_analyze:
+
+    left_col, right_col = st.columns(
+        [1.03, 1],
+        gap="medium"
+    )
+
+
+    # ========================================================
+    # LEFT — INPUT CANVAS
+    # ========================================================
+
+    with left_col:
+
+        st.markdown(
+            '<div class="main-card">',
+            unsafe_allow_html=True
         )
 
-    elif (
-        not text_input.strip()
-        and preview_image is None
+        st.markdown(
+            """
+            <div class="inner-card">
+
+                <div class="section-title">
+                    📊 Input Analysis Canvas
+                </div>
+
+                <div class="section-subtitle">
+                    Content Payload
+                </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+        # ----------------------------------------------------
+        # LANGUAGE BUTTONS
+        # ----------------------------------------------------
+
+        lang_cols = st.columns(6)
+
+        for col, lang in zip(
+            lang_cols,
+            ["EN", "HI", "KN", "TA", "TE", "ML"]
+        ):
+
+            with col:
+
+                st.markdown(
+                    f"""
+                    <div style="
+                        text-align:center;
+                        border:1px solid #cbd5e1;
+                        background:#f8fafc;
+                        border-radius:5px;
+                        padding:4px;
+                        font-size:9px;
+                        color:#334155;
+                    ">
+                        {lang}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+
+        # ----------------------------------------------------
+        # TEXT
+        # ----------------------------------------------------
+
+        text_input = st.text_area(
+            "Content",
+            value=st.session_state.last_text,
+            height=115,
+            label_visibility="collapsed",
+            placeholder=(
+                "Paste rumor text, social media headlines, "
+                "or claims here. Multi-script detection "
+                "(Hindi, Kannada, etc.) is active..."
+            )
+        )
+
+
+        st.markdown(
+            """
+            <div class="section-subtitle"
+                 style="margin-top:8px;">
+                Multimodal Context (Optional)
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+        # ----------------------------------------------------
+        # IMAGE
+        # ----------------------------------------------------
+
+        uploaded_image = st.file_uploader(
+            "Upload image",
+            type=[
+                "jpg",
+                "jpeg",
+                "png",
+                "webp"
+            ],
+            label_visibility="collapsed"
+        )
+
+
+        if uploaded_image is not None:
+
+            preview = Image.open(
+                uploaded_image
+            ).convert("RGB")
+
+            st.image(
+                preview,
+                use_container_width=True
+            )
+
+
+        else:
+
+            st.markdown(
+                """
+                <div style="
+                    height:150px;
+                    border:1px solid #334155;
+                    background:white;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    color:#94a3b8;
+                    font-size:10px;
+                ">
+                    Upload an image for multimodal analysis
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+        # ----------------------------------------------------
+        # CLEAR / ANALYZE
+        # ----------------------------------------------------
+
+        clear_col, analyze_col = st.columns(
+            [1, 1]
+        )
+
+
+        with clear_col:
+
+            clear_button = st.button(
+                "🗑 Clear",
+                use_container_width=True
+            )
+
+
+        with analyze_col:
+
+            analyze_button = st.button(
+                "⚡ Analyze",
+                type="primary",
+                use_container_width=True
+            )
+
+
+        st.markdown(
+            "</div>",
+            unsafe_allow_html=True
+        )
+
+
+    # ========================================================
+    # RIGHT — INFERENCE REPORT
+    # ========================================================
+
+    with right_col:
+
+        result = st.session_state.last_result
+
+
+        st.markdown(
+            """
+            <div class="result-card">
+
+                <span class="live-badge">
+                    ● LIVE
+                </span>
+
+                <div class="result-title">
+                    Inference Report
+                </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+        # ----------------------------------------------------
+        # RESULT METRICS
+        # ----------------------------------------------------
+
+        if result is None:
+
+            prediction = "—"
+            confidence = "—"
+
+            model_name = "Waiting for input"
+            processing_time = "—"
+
+            rumor_probability = 0
+            normal_probability = 0
+
+        else:
+
+            prediction = result[
+                "prediction"
+            ]
+
+            confidence = (
+                f"{result['confidence'] * 100:.2f}%"
+            )
+
+            model_name = result[
+                "model"
+            ]
+
+            processing_time = (
+                f"{result['processing_time'] / 1000:.1f} s"
+            )
+
+            rumor_probability = (
+                result["rumor"]
+            )
+
+            normal_probability = (
+                result["non_rumor"]
+            )
+
+
+        metric1, metric2 = st.columns(2)
+
+
+        with metric1:
+
+            prediction_class = (
+                "rumor-value"
+                if "Rumor" in prediction
+                and "Non" not in prediction
+                else "normal-value"
+            )
+
+            st.markdown(
+                f"""
+                <div class="metric-box">
+
+                    <div class="metric-label">
+                        Prediction
+                    </div>
+
+                    <div class="metric-value {prediction_class}">
+                        {prediction}
+                    </div>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+        with metric2:
+
+            st.markdown(
+                f"""
+                <div class="metric-box">
+
+                    <div class="metric-label">
+                        Confidence
+                    </div>
+
+                    <div class="metric-value">
+                        {confidence}
+                    </div>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+        # ----------------------------------------------------
+        # MODEL INFORMATION
+        # ----------------------------------------------------
+
+        st.markdown(
+            f"""
+            <div style="
+                margin-top:13px;
+                padding-bottom:9px;
+                border-bottom:1px solid #e2e8f0;
+                font-size:9px;
+            ">
+
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    margin-bottom:8px;
+                ">
+
+                    <span style="color:#64748b;">
+                        Model Used
+                    </span>
+
+                    <b style="color:#0f172a;">
+                        {model_name}
+                    </b>
+
+                </div>
+
+
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                ">
+
+                    <span style="color:#64748b;">
+                        Process Time
+                    </span>
+
+                    <b style="color:#0f172a;">
+                        {processing_time}
+                    </b>
+
+                </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+        # ----------------------------------------------------
+        # PROBABILITIES
+        # ----------------------------------------------------
+
+        st.markdown(
+            """
+            <div class="prob-title">
+                Probability Distribution
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+        st.markdown(
+            f"""
+            <div class="prob-row">
+
+                <div class="prob-label">
+
+                    <span>Rumor Class</span>
+
+                    <span>
+                        {rumor_probability:.3f}
+                    </span>
+
+                </div>
+
+                <div class="prob-track">
+
+                    <div
+                        class="prob-rumor"
+                        style="width:{rumor_probability * 100:.2f}%"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <div class="prob-row">
+
+                <div class="prob-label">
+
+                    <span>Non-Rumor Class</span>
+
+                    <span>
+                        {normal_probability:.3f}
+                    </span>
+
+                </div>
+
+                <div class="prob-track">
+
+                    <div
+                        class="prob-normal"
+                        style="width:{normal_probability * 100:.2f}%"
+                    ></div>
+
+                </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+        # ----------------------------------------------------
+        # DOMAIN WARNING
+        # ----------------------------------------------------
+
+        if result is None:
+
+            warning_text = (
+                "No analysis performed yet."
+            )
+
+            warning_class = "domain-warning"
+
+        elif result["domain_warning"]:
+
+            warning_text = (
+                "⚠️ "
+                + result["domain_warning"]
+            )
+
+            warning_class = "domain-warning"
+
+        else:
+
+            warning_text = (
+                "✓ No domain-shift concerns "
+                "detected for this input."
+            )
+
+            warning_class = "domain-ok"
+
+
+        st.markdown(
+            f"""
+            <div class="{warning_class}">
+                {warning_text}
+            </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+    # ========================================================
+    # EXAMPLES
+    # ========================================================
+
+    st.markdown(
+        "<br>",
+        unsafe_allow_html=True
+    )
+
+
+    with st.expander(
+        "🌐 English examples",
+        expanded=False
     ):
+
+        st.markdown(
+            '<div class="example-title">☷ Examples</div>',
+            unsafe_allow_html=True
+        )
+
+        for example in english_examples:
+
+            if st.button(
+                example,
+                key=f"eng_{hash(example)}",
+                use_container_width=True
+            ):
+
+                st.session_state.last_text = example
+
+                st.rerun()
+
+
+    with st.expander(
+        "🌏 Hindi / Kannada / Tamil / Telugu / Malayalam examples",
+        expanded=False
+    ):
+
+        st.markdown(
+            '<div class="example-title">☷ Examples</div>',
+            unsafe_allow_html=True
+        )
+
+        for example in indian_examples:
+
+            if st.button(
+                example,
+                key=f"ind_{hash(example)}",
+                use_container_width=True
+            ):
+
+                st.session_state.last_text = example
+
+                st.rerun()
+
+
+# ============================================================
+# EXPLAINABILITY TAB
+# ============================================================
+
+with tab_explain:
+
+    result = st.session_state.last_result
+
+
+    if result is None:
+
+        st.info(
+            "Run an analysis first. "
+            "LIME and Grad-CAM explanations "
+            "will appear here."
+        )
+
+    else:
+
+        st.markdown(
+            """
+            <div class="explanation-card">
+
+                <div class="result-title">
+                    🔎 Text Explanation — LIME
+                </div>
+
+            """,
+            unsafe_allow_html=True
+        )
+
+
+        # ----------------------------------------------------
+        # LIME
+        # ----------------------------------------------------
+
+        if result["lime_html"]:
+
+            st.markdown(
+                result["lime_html"],
+                unsafe_allow_html=True
+            )
+
+            st.markdown(
+                """
+                <div style="
+                    margin-top:10px;
+                    font-size:9px;
+                    color:#64748b;
+                ">
+                    <b style="color:#dc2626;">
+                        Red
+                    </b>
+                    = pushes toward Rumor
+                    &nbsp;&nbsp;&nbsp;
+                    <b style="color:#087f79;">
+                        Green
+                    </b>
+                    = pushes toward Non-Rumor
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+        st.markdown(
+            "</div>",
+            unsafe_allow_html=True
+        )
+
+
+        # ----------------------------------------------------
+        # TEXT EXPLANATION
+        # ----------------------------------------------------
+
+        if result["plain_explanation"]:
+
+            st.markdown(
+                f"""
+                <div class="explanation-card">
+
+                    <div class="result-title">
+                        📝 Explanation
+                    </div>
+
+                    <div style="
+                        font-size:11px;
+                        color:#334155;
+                        line-height:1.7;
+                    ">
+                        {result["plain_explanation"]}
+                    </div>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+        # ----------------------------------------------------
+        # GRAD-CAM
+        # ----------------------------------------------------
+
+        if result["gradcam"] is not None:
+
+            st.markdown(
+                """
+                <div class="explanation-card">
+
+                    <div class="result-title">
+                        🔥 Image Explanation — Grad-CAM
+                    </div>
+
+                """,
+                unsafe_allow_html=True
+            )
+
+            st.image(
+                result["gradcam"],
+                use_container_width=True
+            )
+
+            st.markdown(
+                """
+                <div style="
+                    font-size:9px;
+                    color:#64748b;
+                    margin-top:5px;
+                ">
+                    Highlighted regions represent image
+                    areas contributing to the prediction.
+                </div>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+# ============================================================
+# CLEAR BUTTON
+# ============================================================
+
+if "clear_button" in locals() and clear_button:
+
+    st.session_state.last_result = None
+    st.session_state.last_text = ""
+
+    st.rerun()
+
+
+# ============================================================
+# ANALYZE BUTTON
+# ============================================================
+
+if "analyze_button" in locals() and analyze_button:
+
+    if not text_input.strip() and uploaded_image is None:
 
         st.warning(
             "Please enter text, upload an image, "
             "or provide both."
+        )
+
+    elif not models_loaded:
+
+        st.error(
+            "Models are not loaded. "
+            "Please check the deployment logs."
         )
 
     else:
@@ -1220,155 +2278,19 @@ if analyze_button:
 
                 result = run_inference(
                     text_input,
-                    preview_image,
+                    uploaded_image,
                     models_data
                 )
 
-                # ============================================
-                # RESULT
-                # ============================================
+                st.session_state.last_result = result
+                st.session_state.last_text = text_input
 
-                st.subheader(
-                    "📊 Inference Report"
-                )
-
-                result_col1, result_col2 = st.columns(2)
-
-                with result_col1:
-
-                    prediction = result[
-                        "prediction"
-                    ]
-
-                    if "Rumor" in prediction and "Non" not in prediction:
-
-                        st.error(
-                            f"Prediction: {prediction}"
-                        )
-
-                    else:
-
-                        st.success(
-                            f"Prediction: {prediction}"
-                        )
-
-                with result_col2:
-
-                    st.metric(
-                        "Confidence",
-                        f"{result['confidence'] * 100:.2f}%"
-                    )
-
-                # ============================================
-                # METADATA
-                # ============================================
-
-                meta1, meta2 = st.columns(2)
-
-                with meta1:
-
-                    st.write(
-                        "**Model Used:**",
-                        result["model"]
-                    )
-
-                with meta2:
-
-                    st.write(
-                        "**Processing Time:**",
-                        f"{result['processing_time']:.1f} ms"
-                    )
-
-                # ============================================
-                # PROBABILITIES
-                # ============================================
-
-                st.subheader(
-                    "Probability Distribution"
-                )
-
-                p1, p2 = st.columns(2)
-
-                with p1:
-
-                    st.metric(
-                        "Non-Rumor",
-                        f"{result['non_rumor'] * 100:.2f}%"
-                    )
-
-                    st.progress(
-                        float(result["non_rumor"])
-                    )
-
-                with p2:
-
-                    st.metric(
-                        "Rumor",
-                        f"{result['rumor'] * 100:.2f}%"
-                    )
-
-                    st.progress(
-                        float(result["rumor"])
-                    )
-
-                # ============================================
-                # DOMAIN WARNING
-                # ============================================
-
-                if result["domain_warning"]:
-
-                    st.warning(
-                        result["domain_warning"]
-                    )
-
-                # ============================================
-                # TEXT EXPLANATION
-                # ============================================
-
-                if result["lime_html"]:
-
-                    st.subheader(
-                        "🔎 Text Explanation — LIME"
-                    )
-
-                    st.markdown(
-                        result["lime_html"],
-                        unsafe_allow_html=True
-                    )
-
-                    st.subheader(
-                        "📝 Explanation"
-                    )
-
-                    st.markdown(
-                        result["plain_explanation"]
-                    )
-
-                # ============================================
-                # IMAGE EXPLANATION
-                # ============================================
-
-                if result["gradcam"] is not None:
-
-                    st.subheader(
-                        "🔥 Image Explanation — Grad-CAM"
-                    )
-
-                    st.image(
-                        result["gradcam"],
-                        caption=(
-                            "Grad-CAM visualization "
-                            "showing regions influencing "
-                            "the prediction."
-                        ),
-                        use_container_width=True
-                    )
+                st.rerun()
 
             except Exception as e:
 
                 st.error(
-                    "An error occurred while processing "
-                    "the input."
+                    "An error occurred during inference."
                 )
 
                 st.exception(e)
@@ -1378,9 +2300,17 @@ if analyze_button:
 # FOOTER
 # ============================================================
 
-st.divider()
-
-st.caption(
-    "Intelligent Rumor Detection using BERT, "
-    "mBERT, ResNet50 and Multimodal Fusion"
+st.markdown(
+    """
+    <div style="
+        text-align:center;
+        color:#94a3b8;
+        font-size:9px;
+        padding:20px 0 5px 0;
+    ">
+        Intelligent Rumor Detection using BERT,
+        mBERT, ResNet50 and Multimodal Fusion
+    </div>
+    """,
+    unsafe_allow_html=True
 )
