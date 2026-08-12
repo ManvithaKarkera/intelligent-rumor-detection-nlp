@@ -1,0 +1,11 @@
+streamlit
+torch
+torchvision
+transformers
+huggingface_hub
+numpy
+pandas
+Pillow
+scikit-learn
+lime
+opencv-python-headless
