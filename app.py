@@ -1069,12 +1069,13 @@ render_html(
         border-radius: 7px;
         padding: 9px 11px;
         font-size: 13px;
-        margin-top: 12px;
+        margin-top: 6px;
         margin-bottom: 2px;
         line-height: 1.45;
         box-sizing: border-box;
         width: 100%;
         overflow-wrap: break-word;
+        text-align: center;
     }
 
     .domain-ok {
