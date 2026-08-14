@@ -500,15 +500,10 @@ def render_lime_html(word_scores):
         )
 
         html_parts.append(
-            f"""
-            <span class="word-pill"
-                  style="
-                    background:{background};
-                    border:1px solid rgba(148,163,184,0.25);
-                  ">
-                {safe_word}
-            </span>
-            """
+            f'<span class="word-pill" '
+            f'style="background:{background};'
+            f'border:1px solid rgba(148,163,184,0.25);">'
+            f'{safe_word}</span>'
         )
 
     html_parts.append("</div>")
@@ -1184,44 +1179,42 @@ st.markdown("<br>", unsafe_allow_html=True)
 left_col, right_col = st.columns([1, 1], gap="large")
 
 with left_col:
-    st.markdown('<div class="main-card">', unsafe_allow_html=True)
-    render_html(
-        '<div class="section-title">Analyze Content</div>'
-        '<div class="section-subtitle">Text, Image, or Both</div>'
-)
-
-    text_input = st.text_area(
-        "Text",
-        value=st.session_state.last_text,
-        height=160,
-        placeholder="Paste a claim, headline, or message to analyze...",
-        label_visibility="collapsed",
-    )
-
-    uploaded_image = st.file_uploader(
-        "Image (optional)",
-        type=["png", "jpg", "jpeg", "webp"],
-    )
-
-    if uploaded_image is not None:
-        st.image(uploaded_image, use_container_width=True)
-
-    button_col1, button_col2 = st.columns(2)
-
-    with button_col1:
-        analyze_button = st.button(
-            "🔍 Analyze",
-            type="primary",
-            use_container_width=True,
+    with st.container(border=True):
+        render_html(
+            '<div class="section-title">Analyze Content</div>'
+            '<div class="section-subtitle">Text, Image, or Both</div>'
         )
 
-    with button_col2:
-        clear_button = st.button(
-            "Clear",
-            use_container_width=True,
+        text_input = st.text_area(
+            "Text",
+            value=st.session_state.last_text,
+            height=160,
+            placeholder="Paste a claim, headline, or message to analyze...",
+            label_visibility="collapsed",
         )
 
-    st.markdown("</div>", unsafe_allow_html=True)
+        uploaded_image = st.file_uploader(
+            "Image (optional)",
+            type=["png", "jpg", "jpeg", "webp"],
+        )
+
+        if uploaded_image is not None:
+            st.image(uploaded_image, use_container_width=True)
+
+        button_col1, button_col2 = st.columns(2)
+
+        with button_col1:
+            analyze_button = st.button(
+                "🔍 Analyze",
+                type="primary",
+                use_container_width=True,
+            )
+
+        with button_col2:
+            clear_button = st.button(
+                "Clear",
+                use_container_width=True,
+            )
 
     # ========================================================
     # RIGHT — INFERENCE REPORT
@@ -1230,165 +1223,164 @@ with left_col:
 with right_col:
     result = st.session_state.last_result
 
-    render_html(
-        """
-        <div class="result-card">
+    with st.container(border=True):
+        render_html(
+            """
             <span class="live-badge">● LIVE</span>
             <div class="result-title">
                 Inference Report
             </div>
-        """
-)
-
-    if result is None:
-        prediction = "—"
-        confidence = "—"
-        model_name = "Waiting for input"
-        processing_time = "—"
-        rumor_probability = 0.0
-        normal_probability = 0.0
-    else:
-        prediction = result["prediction"]
-        confidence = f"{result['confidence'] * 100:.2f}%"
-        model_name = result["model"]
-        processing_time = (
-            f"{result['processing_time'] / 1000:.1f} s"
+            """
         )
-        rumor_probability = result["rumor"]
-        normal_probability = result["non_rumor"]
 
-    metric1, metric2 = st.columns(2)
-
-    with metric1:
-        prediction_class = (
-            "rumor-value"
-            if (
-                "Rumor" in prediction
-                and "Non" not in prediction
+        if result is None:
+            prediction = "—"
+            confidence = "—"
+            model_name = "Waiting for input"
+            processing_time = "—"
+            rumor_probability = 0.0
+            normal_probability = 0.0
+        else:
+            prediction = result["prediction"]
+            confidence = f"{result['confidence'] * 100:.2f}%"
+            model_name = result["model"]
+            processing_time = (
+                f"{result['processing_time'] / 1000:.1f} s"
             )
-            else "normal-value"
+            rumor_probability = result["rumor"]
+            normal_probability = result["non_rumor"]
+
+        metric1, metric2 = st.columns(2)
+
+        with metric1:
+            prediction_class = (
+                "rumor-value"
+                if (
+                    "Rumor" in prediction
+                    and "Non" not in prediction
+                )
+                else "normal-value"
+            )
+
+            render_html(
+                f"""
+                <div class="metric-box">
+                    <div class="metric-label">
+                        Prediction
+                    </div>
+                    <div class="metric-value {prediction_class}">
+                        {prediction}
+                    </div>
+                </div>
+                """
+            )
+
+        with metric2:
+            render_html(
+                f"""
+                <div class="metric-box">
+                    <div class="metric-label">
+                        Confidence
+                    </div>
+                    <div class="metric-value">
+                        {confidence}
+                    </div>
+                </div>
+                """
+            )
+
+        render_html(
+            f"""
+            <div style="
+                margin-top:13px;
+                padding-bottom:9px;
+                border-bottom:1px solid #e2e8f0;
+                font-size:15px;
+            ">
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    margin-bottom:8px;
+                ">
+                    <span style="color:#64748b;">
+                        Model Used
+                    </span>
+                    <b style="color:#0f172a;">
+                        {model_name}
+                    </b>
+                </div>
+
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                ">
+                    <span style="color:#64748b;">
+                        Process Time
+                    </span>
+                    <b style="color:#0f172a;">
+                        {processing_time}
+                    </b>
+                </div>
+            </div>
+            """
+        )
+
+        render_html(
+            """
+            <div class="prob-title">
+                Probability Distribution
+            </div>
+            """
         )
 
         render_html(
             f"""
-            <div class="metric-box">
-                <div class="metric-label">
-                    Prediction
+            <div class="prob-row">
+                <div class="prob-label">
+                    <span>Rumor Class</span>
+                    <span>{rumor_probability:.3f}</span>
                 </div>
-                <div class="metric-value {prediction_class}">
-                    {prediction}
+                <div class="prob-track">
+                    <div class="prob-rumor"
+                         style="width:{rumor_probability * 100:.2f}%">
+                    </div>
+                </div>
+            </div>
+
+            <div class="prob-row">
+                <div class="prob-label">
+                    <span>Non-Rumor Class</span>
+                    <span>{normal_probability:.3f}</span>
+                </div>
+                <div class="prob-track">
+                    <div class="prob-normal"
+                         style="width:{normal_probability * 100:.2f}%">
+                    </div>
                 </div>
             </div>
             """
-)
+        )
 
-    with metric2:
+        if result is None:
+            warning_text = "No analysis performed yet."
+            warning_class = "domain-warning"
+        elif result["domain_warning"]:
+            warning_text = "⚠️ " + result["domain_warning"]
+            warning_class = "domain-warning"
+        else:
+            warning_text = (
+                "✓ No domain-shift concerns detected "
+                "for this input."
+            )
+            warning_class = "domain-ok"
+
         render_html(
             f"""
-            <div class="metric-box">
-                <div class="metric-label">
-                    Confidence
-                </div>
-                <div class="metric-value">
-                    {confidence}
-                </div>
+            <div class="{warning_class}">
+                {warning_text}
             </div>
             """
-)
-
-    render_html(
-        f"""
-        <div style="
-            margin-top:13px;
-            padding-bottom:9px;
-            border-bottom:1px solid #e2e8f0;
-            font-size:15px;
-        ">
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                margin-bottom:8px;
-            ">
-                <span style="color:#64748b;">
-                    Model Used
-                </span>
-                <b style="color:#0f172a;">
-                    {model_name}
-                </b>
-            </div>
-
-            <div style="
-                display:flex;
-                justify-content:space-between;
-            ">
-                <span style="color:#64748b;">
-                    Process Time
-                </span>
-                <b style="color:#0f172a;">
-                    {processing_time}
-                </b>
-            </div>
-        </div>
-        """
-)
-
-    render_html(
-        """
-        <div class="prob-title">
-            Probability Distribution
-        </div>
-        """
-)
-
-    render_html(
-        f"""
-        <div class="prob-row">
-            <div class="prob-label">
-                <span>Rumor Class</span>
-                <span>{rumor_probability:.3f}</span>
-            </div>
-            <div class="prob-track">
-                <div class="prob-rumor"
-                     style="width:{rumor_probability * 100:.2f}%">
-                </div>
-            </div>
-        </div>
-
-        <div class="prob-row">
-            <div class="prob-label">
-                <span>Non-Rumor Class</span>
-                <span>{normal_probability:.3f}</span>
-            </div>
-            <div class="prob-track">
-                <div class="prob-normal"
-                     style="width:{normal_probability * 100:.2f}%">
-                </div>
-            </div>
-        </div>
-        """
-)
-
-    if result is None:
-        warning_text = "No analysis performed yet."
-        warning_class = "domain-warning"
-    elif result["domain_warning"]:
-        warning_text = "⚠️ " + result["domain_warning"]
-        warning_class = "domain-warning"
-    else:
-        warning_text = (
-            "✓ No domain-shift concerns detected "
-            "for this input."
         )
-        warning_class = "domain-ok"
-
-    render_html(
-        f"""
-        <div class="{warning_class}">
-            {warning_text}
-        </div>
-        </div>
-        """
-)
 
 # ========================================================
 # EXAMPLES
@@ -1447,40 +1439,37 @@ with tab_explain:
         )
     else:
         if result["lime_html"]:
-            render_html(
-                """
-                <div class="explanation-card">
+            with st.container(border=True):
+                render_html(
+                    """
                     <div class="result-title">
                         🔎 Text Explanation — LIME
                     </div>
-                """
-)
+                    """
+                )
 
-            render_html(
-                result["lime_html"]
-)
+                render_html(result["lime_html"])
 
-            render_html(
-                """
-                <div style="
-                    margin-top:10px;
-                    font-size:14px;
-                    color:#64748b;
-                ">
-                    <b style="color:#dc2626;">Red</b>
-                    = pushes toward Rumor
-                    &nbsp;&nbsp;&nbsp;
-                    <b style="color:#087f79;">Green</b>
-                    = pushes toward Non-Rumor
-                </div>
-                </div>
-                """
-)
+                render_html(
+                    """
+                    <div style="
+                        margin-top:10px;
+                        font-size:14px;
+                        color:#64748b;
+                    ">
+                        <b style="color:#dc2626;">Red</b>
+                        = pushes toward Rumor
+                        &nbsp;&nbsp;&nbsp;
+                        <b style="color:#087f79;">Green</b>
+                        = pushes toward Non-Rumor
+                    </div>
+                    """
+                )
 
         if result["plain_explanation"]:
-            render_html(
-                f"""
-                <div class="explanation-card">
+            with st.container(border=True):
+                render_html(
+                    f"""
                     <div class="result-title">
                         📝 Explanation
                     </div>
@@ -1491,38 +1480,36 @@ with tab_explain:
                     ">
                         {result["plain_explanation"]}
                     </div>
-                </div>
-                """
-)
+                    """
+                )
 
         if result["gradcam"] is not None:
-            render_html(
-                """
-                <div class="explanation-card">
+            with st.container(border=True):
+                render_html(
+                    """
                     <div class="result-title">
                         🔥 Image Explanation — Grad-CAM
                     </div>
-                """
-)
+                    """
+                )
 
-            st.image(
-                result["gradcam"],
-                use_container_width=True,
-            )
+                st.image(
+                    result["gradcam"],
+                    use_container_width=True,
+                )
 
-            render_html(
-                """
-                <div style="
-                    font-size:14px;
-                    color:#64748b;
-                    margin-top:5px;
-                ">
-                    Highlighted regions represent image
-                    areas contributing to the prediction.
-                </div>
-                </div>
-                """
-)
+                render_html(
+                    """
+                    <div style="
+                        font-size:14px;
+                        color:#64748b;
+                        margin-top:5px;
+                    ">
+                        Highlighted regions represent image
+                        areas contributing to the prediction.
+                    </div>
+                    """
+                )
 
 
 # ============================================================
