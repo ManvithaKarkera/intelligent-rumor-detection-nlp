@@ -1087,6 +1087,132 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+
+# ============================================================
+# SESSION STATE
+# ============================================================
+
+if "last_result" not in st.session_state:
+    st.session_state.last_result = None
+
+if "last_text" not in st.session_state:
+    st.session_state.last_text = ""
+
+
+# ============================================================
+# LOAD MODELS (once, cached)
+# ============================================================
+
+with st.spinner("Loading models... this can take a minute on first run."):
+    models_data = load_all_models()
+
+
+# ============================================================
+# EXAMPLE INPUTS
+# ============================================================
+
+english_examples = [
+    "Breaking: Scientists confirm the earth will stop rotating next week.",
+    "Local hospital reports record number of flu vaccinations this season.",
+    "Celebrity spotted secretly funding a hidden underground city.",
+    "City council approves new budget for public transportation upgrades.",
+]
+
+indian_examples = [
+    "सरकार ने कल से सभी बैंकों को बंद करने का आदेश दिया है।",
+    "ಮುಂದಿನ ವಾರದಿಂದ ಎಲ್ಲಾ ಶಾಲೆಗಳನ್ನು ಮುಚ್ಚಲಾಗುವುದು ಎಂದು ಸರ್ಕಾರ ಘೋಷಿಸಿದೆ.",
+    "அரசு அனைத்து மின்சார கட்டணங்களையும் இலவசமாக்கியது என தகவல்.",
+    "రేపటి నుండి అన్ని రైళ్లు రద్దు చేయబడతాయని వార్త వ్యాప్తి చెందుతోంది.",
+    "നാളെ മുതൽ എല്ലാ പെട്രോൾ പമ്പുകളും അടച്ചിടുമെന്ന് വാർത്ത.",
+]
+
+
+# ============================================================
+# HEADER
+# ============================================================
+
+st.markdown(
+    """
+    <div class="app-header">
+        <div class="header-title">
+            <span class="shield">🛡️</span>
+            <span>Intelligent Rumor Detection</span>
+        </div>
+        <div class="language-pills">
+            <span class="language-pill">English</span>
+            <span class="language-pill">Hindi</span>
+            <span class="language-pill">Kannada</span>
+            <span class="language-pill">Tamil</span>
+            <span class="language-pill">Telugu</span>
+            <span class="language-pill">Malayalam</span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <div class="status-container">
+        <div class="status-pill"><span class="status-dot">●</span> Text Model Ready</div>
+        <div class="status-pill"><span class="status-dot">●</span> Multilingual Model Ready</div>
+        <div class="status-pill"><span class="status-dot">●</span> Image Model Ready</div>
+        <div class="status-pill"><span class="status-dot">●</span> Multimodal Fusion Ready</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+
+# ============================================================
+# LAYOUT — INPUT (left) / REPORT (right)
+# ============================================================
+
+left_col, right_col = st.columns([1, 1], gap="large")
+
+with left_col:
+    st.markdown('<div class="main-card">', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-title">Analyze Content</div>'
+        '<div class="section-subtitle">Text, Image, or Both</div>',
+        unsafe_allow_html=True,
+    )
+
+    text_input = st.text_area(
+        "Text",
+        value=st.session_state.last_text,
+        height=160,
+        placeholder="Paste a claim, headline, or message to analyze...",
+        label_visibility="collapsed",
+    )
+
+    uploaded_image = st.file_uploader(
+        "Image (optional)",
+        type=["png", "jpg", "jpeg", "webp"],
+    )
+
+    if uploaded_image is not None:
+        st.image(uploaded_image, use_container_width=True)
+
+    button_col1, button_col2 = st.columns(2)
+
+    with button_col1:
+        analyze_button = st.button(
+            "🔍 Analyze",
+            type="primary",
+            use_container_width=True,
+        )
+
+    with button_col2:
+        clear_button = st.button(
+            "Clear",
+            use_container_width=True,
+        )
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
     # ========================================================
     # RIGHT — INFERENCE REPORT
     # ========================================================
@@ -1308,98 +1434,100 @@ with st.expander(
 # EXPLAINABILITY TAB
 # ============================================================
 
+(tab_explain,) = st.tabs(["🧩 Explainability"])
+
 with tab_explain:
-result = st.session_state.last_result
+    result = st.session_state.last_result
 
-if result is None:
-    st.info(
-        "Run an analysis first. LIME and Grad-CAM "
-        "explanations will appear here."
-    )
-else:
-    if result["lime_html"]:
-        st.markdown(
-            """
-            <div class="explanation-card">
-                <div class="result-title">
-                    🔎 Text Explanation — LIME
-                </div>
-            """,
-            unsafe_allow_html=True,
+    if result is None:
+        st.info(
+            "Run an analysis first. LIME and Grad-CAM "
+            "explanations will appear here."
         )
+    else:
+        if result["lime_html"]:
+            st.markdown(
+                """
+                <div class="explanation-card">
+                    <div class="result-title">
+                        🔎 Text Explanation — LIME
+                    </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-        st.markdown(
-            result["lime_html"],
-            unsafe_allow_html=True,
-        )
+            st.markdown(
+                result["lime_html"],
+                unsafe_allow_html=True,
+            )
 
-        st.markdown(
-            """
-            <div style="
-                margin-top:10px;
-                font-size:12px;
-                color:#64748b;
-            ">
-                <b style="color:#dc2626;">Red</b>
-                = pushes toward Rumor
-                &nbsp;&nbsp;&nbsp;
-                <b style="color:#087f79;">Green</b>
-                = pushes toward Non-Rumor
-            </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    if result["plain_explanation"]:
-        st.markdown(
-            f"""
-            <div class="explanation-card">
-                <div class="result-title">
-                    📝 Explanation
-                </div>
+            st.markdown(
+                """
                 <div style="
-                    font-size:11px;
-                    color:#334155;
-                    line-height:1.7;
+                    margin-top:10px;
+                    font-size:12px;
+                    color:#64748b;
                 ">
-                    {result["plain_explanation"]}
+                    <b style="color:#dc2626;">Red</b>
+                    = pushes toward Rumor
+                    &nbsp;&nbsp;&nbsp;
+                    <b style="color:#087f79;">Green</b>
+                    = pushes toward Non-Rumor
                 </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    if result["gradcam"] is not None:
-        st.markdown(
-            """
-            <div class="explanation-card">
-                <div class="result-title">
-                    🔥 Image Explanation — Grad-CAM
                 </div>
-            """,
-            unsafe_allow_html=True,
-        )
+                """,
+                unsafe_allow_html=True,
+            )
 
-        st.image(
-            result["gradcam"],
-            use_container_width=True,
-        )
+        if result["plain_explanation"]:
+            st.markdown(
+                f"""
+                <div class="explanation-card">
+                    <div class="result-title">
+                        📝 Explanation
+                    </div>
+                    <div style="
+                        font-size:11px;
+                        color:#334155;
+                        line-height:1.7;
+                    ">
+                        {result["plain_explanation"]}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-        st.markdown(
-            """
-            <div style="
-                font-size:12px;
-                color:#64748b;
-                margin-top:5px;
-            ">
-                Highlighted regions represent image
-                areas contributing to the prediction.
-            </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        if result["gradcam"] is not None:
+            st.markdown(
+                """
+                <div class="explanation-card">
+                    <div class="result-title">
+                        🔥 Image Explanation — Grad-CAM
+                    </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            st.image(
+                result["gradcam"],
+                use_container_width=True,
+            )
+
+            st.markdown(
+                """
+                <div style="
+                    font-size:12px;
+                    color:#64748b;
+                    margin-top:5px;
+                ">
+                    Highlighted regions represent image
+                    areas contributing to the prediction.
+                </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
 
 # ============================================================
@@ -1407,36 +1535,42 @@ else:
 # ============================================================
 
 if clear_button:
-st.session_state.last_result = None
-st.session_state.last_text = ""
-st.rerun()
+    st.session_state.last_result = None
+    st.session_state.last_text = ""
+    st.rerun()
 
 
 if analyze_button:
-if not text_input.strip() and uploaded_image is None:
-    st.warning(
-        "Please enter text, upload an image, "
-        "or provide both."
-    )
-else:
-    with st.spinner("Analyzing content..."):
-        try:
-            result = run_inference(
-                text_input,
-                uploaded_image,
-                models_data,
-            )
+    if not text_input.strip() and uploaded_image is None:
+        st.warning(
+            "Please enter text, upload an image, "
+            "or provide both."
+        )
+    else:
+        with st.spinner("Analyzing content..."):
+            try:
+                pil_image = (
+                    Image.open(uploaded_image)
+                    if uploaded_image is not None
+                    else None
+                )
 
-            st.session_state.last_result = result
-            st.session_state.last_text = text_input
+                result = run_inference(
+                    text_input,
+                    pil_image,
+                    models_data,
+                )
 
-            st.rerun()
+                st.session_state.last_result = result
+                st.session_state.last_text = text_input
 
-        except Exception as e:
-            st.error(
-                "An error occurred during inference."
-            )
-            st.exception(e)
+                st.rerun()
+
+            except Exception as e:
+                st.error(
+                    "An error occurred during inference."
+                )
+                st.exception(e)
 
 
 # ============================================================
@@ -1444,16 +1578,16 @@ else:
 # ============================================================
 
 st.markdown(
-"""
-<div style="
-    text-align:center;
-    color:#94a3b8;
-    font-size:12px;
-    padding:20px 0 5px 0;
-">
-    Intelligent Rumor Detection using BERT,
-    mBERT, ResNet50 and Multimodal Fusion
-</div>
-""",
-unsafe_allow_html=True,
+    """
+    <div style="
+        text-align:center;
+        color:#94a3b8;
+        font-size:12px;
+        padding:20px 0 5px 0;
+    ">
+        Intelligent Rumor Detection using BERT,
+        mBERT, ResNet50 and Multimodal Fusion
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
