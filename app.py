@@ -1,6 +1,7 @@
 import os
 import re
 import time
+import textwrap
 
 import numpy as np
 import streamlit as st
@@ -42,6 +43,19 @@ CLASS_NAMES = ["Non-Rumor", "Rumor"]
 DEVICE = torch.device(
     "cuda" if torch.cuda.is_available() else "cpu"
 )
+
+
+# ============================================================
+# HTML RENDER HELPER
+# ============================================================
+# Streamlit's markdown renderer treats any line indented by 4+
+# spaces as a fenced code block, which breaks HTML that keeps
+# Python's own indentation. This strips leading whitespace from
+# every line before rendering so raw HTML always renders as HTML.
+
+def render_html(html_string):
+    flattened = re.sub(r"(?m)^[ \t]+", "", html_string)
+    st.markdown(flattened.strip(), unsafe_allow_html=True)
 
 
 # ============================================================
@@ -786,7 +800,7 @@ def run_inference(text, uploaded_image, models_data):
 # CUSTOM CSS
 # ============================================================
 
-st.markdown(
+render_html(
     """
     <style>
     .stApp { background: #f3f6fa; }
@@ -813,7 +827,7 @@ st.markdown(
         display: flex;
         align-items: center;
         gap: 9px;
-        font-size: 20px;
+        font-size: 24px;
         font-weight: 750;
     }
 
@@ -831,7 +845,7 @@ st.markdown(
         background: rgba(255,255,255,0.14);
         border-radius: 14px;
         padding: 5px 9px;
-        font-size: 11px;
+        font-size: 13px;
         font-weight: 600;
     }
 
@@ -853,7 +867,7 @@ st.markdown(
         background: #f8fafc;
         border-radius: 7px;
         padding: 6px 11px;
-        font-size: 12px;
+        font-size: 14px;
         color: #334155;
     }
 
@@ -880,14 +894,14 @@ st.markdown(
     }
 
     .section-title {
-        font-size: 17px;
+        font-size: 20px;
         font-weight: 750;
         color: #0f172a;
         margin-bottom: 5px;
     }
 
     .section-subtitle {
-        font-size: 11px;
+        font-size: 13px;
         color: #64748b;
         text-transform: uppercase;
         letter-spacing: 0.7px;
@@ -918,9 +932,9 @@ st.markdown(
     div.stButton > button {
         border-radius: 7px;
         border: 1px solid #d1d9e2;
-        font-size: 13px;
+        font-size: 15px;
         font-weight: 650;
-        min-height: 42px;
+        min-height: 44px;
         padding: 7px 12px;
     }
 
@@ -950,7 +964,7 @@ st.markdown(
     }
 
     .result-title {
-        font-size: 18px;
+        font-size: 22px;
         font-weight: 750;
         color: #0f172a;
         margin-bottom: 16px;
@@ -965,14 +979,14 @@ st.markdown(
     }
 
     .metric-label {
-        font-size: 11px;
+        font-size: 13px;
         color: #64748b;
         text-transform: uppercase;
         letter-spacing: 0.4px;
     }
 
     .metric-value {
-        font-size: 19px;
+        font-size: 24px;
         font-weight: 750;
         margin-top: 5px;
         color: #111827;
@@ -984,7 +998,7 @@ st.markdown(
 
     /* PROBABILITY */
     .prob-title {
-        font-size: 12px;
+        font-size: 14px;
         color: #64748b;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -998,7 +1012,7 @@ st.markdown(
     .prob-label {
         display: flex;
         justify-content: space-between;
-        font-size: 12px;
+        font-size: 14px;
         color: #334155;
         margin-bottom: 5px;
     }
@@ -1026,7 +1040,7 @@ st.markdown(
     .domain-ok, .domain-warning {
         border-radius: 7px;
         padding: 9px 11px;
-        font-size: 11px;
+        font-size: 13px;
         margin-top: 12px;
         line-height: 1.45;
     }
@@ -1051,26 +1065,26 @@ st.markdown(
         padding: 5px 9px;
         margin: 3px;
         border-radius: 6px;
-        font-size: 13px;
+        font-size: 16px;
         color: #1e293b;
     }
 
     /* EXAMPLES */
     .example-title {
-        font-size: 13px;
+        font-size: 15px;
         color: #0f766e;
         font-weight: 700;
     }
 
     .example-note {
-        font-size: 12px;
+        font-size: 14px;
         color: #64748b;
         margin-bottom: 7px;
     }
 
     /* TABS */
     button[data-baseweb="tab"] {
-        font-size: 13px !important;
+        font-size: 16px !important;
         font-weight: 650 !important;
     }
 
@@ -1083,8 +1097,7 @@ st.markdown(
         .metric-value { font-size: 16px; }
     }
     </style>
-    """,
-    unsafe_allow_html=True
+    """
 )
 
 
@@ -1131,7 +1144,7 @@ indian_examples = [
 # HEADER
 # ============================================================
 
-st.markdown(
+render_html(
     """
     <div class="app-header">
         <div class="header-title">
@@ -1147,11 +1160,10 @@ st.markdown(
             <span class="language-pill">Malayalam</span>
         </div>
     </div>
-    """,
-    unsafe_allow_html=True,
+    """
 )
 
-st.markdown(
+render_html(
     """
     <div class="status-container">
         <div class="status-pill"><span class="status-dot">●</span> Text Model Ready</div>
@@ -1159,8 +1171,7 @@ st.markdown(
         <div class="status-pill"><span class="status-dot">●</span> Image Model Ready</div>
         <div class="status-pill"><span class="status-dot">●</span> Multimodal Fusion Ready</div>
     </div>
-    """,
-    unsafe_allow_html=True,
+    """
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -1174,11 +1185,10 @@ left_col, right_col = st.columns([1, 1], gap="large")
 
 with left_col:
     st.markdown('<div class="main-card">', unsafe_allow_html=True)
-    st.markdown(
+    render_html(
         '<div class="section-title">Analyze Content</div>'
-        '<div class="section-subtitle">Text, Image, or Both</div>',
-        unsafe_allow_html=True,
-    )
+        '<div class="section-subtitle">Text, Image, or Both</div>'
+)
 
     text_input = st.text_area(
         "Text",
@@ -1220,16 +1230,15 @@ with left_col:
 with right_col:
     result = st.session_state.last_result
 
-    st.markdown(
+    render_html(
         """
         <div class="result-card">
             <span class="live-badge">● LIVE</span>
             <div class="result-title">
                 Inference Report
             </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        """
+)
 
     if result is None:
         prediction = "—"
@@ -1260,7 +1269,7 @@ with right_col:
             else "normal-value"
         )
 
-        st.markdown(
+        render_html(
             f"""
             <div class="metric-box">
                 <div class="metric-label">
@@ -1270,12 +1279,11 @@ with right_col:
                     {prediction}
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
+            """
+)
 
     with metric2:
-        st.markdown(
+        render_html(
             f"""
             <div class="metric-box">
                 <div class="metric-label">
@@ -1285,17 +1293,16 @@ with right_col:
                     {confidence}
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
+            """
+)
 
-    st.markdown(
+    render_html(
         f"""
         <div style="
             margin-top:13px;
             padding-bottom:9px;
             border-bottom:1px solid #e2e8f0;
-            font-size:12px;
+            font-size:15px;
         ">
             <div style="
                 display:flex;
@@ -1322,20 +1329,18 @@ with right_col:
                 </b>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        """
+)
 
-    st.markdown(
+    render_html(
         """
         <div class="prob-title">
             Probability Distribution
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        """
+)
 
-    st.markdown(
+    render_html(
         f"""
         <div class="prob-row">
             <div class="prob-label">
@@ -1360,9 +1365,8 @@ with right_col:
                 </div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        """
+)
 
     if result is None:
         warning_text = "No analysis performed yet."
@@ -1377,15 +1381,14 @@ with right_col:
         )
         warning_class = "domain-ok"
 
-    st.markdown(
+    render_html(
         f"""
         <div class="{warning_class}">
             {warning_text}
         </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        """
+)
 
 # ========================================================
 # EXAMPLES
@@ -1397,10 +1400,9 @@ with st.expander(
     "🌐 English examples",
     expanded=False,
 ):
-    st.markdown(
-        '<div class="example-title">☷ Examples</div>',
-        unsafe_allow_html=True,
-    )
+    render_html(
+        '<div class="example-title">☷ Examples</div>'
+)
 
     for i, example in enumerate(english_examples):
         if st.button(
@@ -1415,10 +1417,9 @@ with st.expander(
     "🌏 Hindi / Kannada / Tamil / Telugu / Malayalam examples",
     expanded=False,
 ):
-    st.markdown(
-        '<div class="example-title">☷ Examples</div>',
-        unsafe_allow_html=True,
-    )
+    render_html(
+        '<div class="example-title">☷ Examples</div>'
+)
 
     for i, example in enumerate(indian_examples):
         if st.button(
@@ -1446,26 +1447,24 @@ with tab_explain:
         )
     else:
         if result["lime_html"]:
-            st.markdown(
+            render_html(
                 """
                 <div class="explanation-card">
                     <div class="result-title">
                         🔎 Text Explanation — LIME
                     </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                """
+)
 
-            st.markdown(
-                result["lime_html"],
-                unsafe_allow_html=True,
-            )
+            render_html(
+                result["lime_html"]
+)
 
-            st.markdown(
+            render_html(
                 """
                 <div style="
                     margin-top:10px;
-                    font-size:12px;
+                    font-size:14px;
                     color:#64748b;
                 ">
                     <b style="color:#dc2626;">Red</b>
@@ -1475,49 +1474,46 @@ with tab_explain:
                     = pushes toward Non-Rumor
                 </div>
                 </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                """
+)
 
         if result["plain_explanation"]:
-            st.markdown(
+            render_html(
                 f"""
                 <div class="explanation-card">
                     <div class="result-title">
                         📝 Explanation
                     </div>
                     <div style="
-                        font-size:11px;
+                        font-size:15px;
                         color:#334155;
-                        line-height:1.7;
+                        line-height:1.8;
                     ">
                         {result["plain_explanation"]}
                     </div>
                 </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                """
+)
 
         if result["gradcam"] is not None:
-            st.markdown(
+            render_html(
                 """
                 <div class="explanation-card">
                     <div class="result-title">
                         🔥 Image Explanation — Grad-CAM
                     </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                """
+)
 
             st.image(
                 result["gradcam"],
                 use_container_width=True,
             )
 
-            st.markdown(
+            render_html(
                 """
                 <div style="
-                    font-size:12px;
+                    font-size:14px;
                     color:#64748b;
                     margin-top:5px;
                 ">
@@ -1525,9 +1521,8 @@ with tab_explain:
                     areas contributing to the prediction.
                 </div>
                 </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                """
+)
 
 
 # ============================================================
@@ -1577,17 +1572,16 @@ if analyze_button:
 # FOOTER
 # ============================================================
 
-st.markdown(
+render_html(
     """
     <div style="
         text-align:center;
         color:#94a3b8;
-        font-size:12px;
+        font-size:13px;
         padding:20px 0 5px 0;
     ">
         Intelligent Rumor Detection using BERT,
         mBERT, ResNet50 and Multimodal Fusion
     </div>
-    """,
-    unsafe_allow_html=True,
+    """
 )
