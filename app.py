@@ -1168,10 +1168,12 @@ english_examples = [
     "Local hospital reports record number of flu vaccinations this season.",
     "Celebrity spotted secretly funding a hidden underground city.",
     "City council approves new budget for public transportation upgrades.",
+    
 ]
 
 indian_examples = [
     "सरकार ने कल से सभी बैंकों को बंद करने का आदेश दिया है।",
+    "ಭಾರತ ಸರ್ಕಾರ ಇಂದು ಹೊಸ ಶಿಕ್ಷಣ ನೀತಿಯನ್ನು ಘೋಷಿಸಿತು",
     "ಮುಂದಿನ ವಾರದಿಂದ ಎಲ್ಲಾ ಶಾಲೆಗಳನ್ನು ಮುಚ್ಚಲಾಗುವುದು ಎಂದು ಸರ್ಕಾರ ಘೋಷಿಸಿದೆ.",
     "அரசு அனைத்து மின்சார கட்டணங்களையும் இலவசமாக்கியது என தகவல்.",
     "రేపటి నుండి అన్ని రైళ్లు రద్దు చేయబడతాయని వార్త వ్యాప్తి చెందుతోంది.",
