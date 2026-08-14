@@ -528,13 +528,46 @@ def generate_plain_explanation(
         reverse=True,
     )
 
-    top_word, top_score = sorted_scores[0]
+    top_supporting = [
+        word for word, score in sorted_scores
+        if (score > 0) == (prediction_label == "Rumor")
+    ][:3]
 
-    explanation = (
-        f"The model leaned toward **{prediction_label}** "
-        f"primarily because of the word **{top_word}**, "
-        "which had the strongest influence on this prediction. "
-    )
+    top_opposing = [
+        word for word, score in sorted_scores
+        if (score > 0) != (prediction_label == "Rumor")
+    ][:2]
+
+    def join_words(words):
+        if len(words) == 1:
+            return f"**{words[0]}**"
+        if len(words) == 2:
+            return f"**{words[0]}** and **{words[1]}**"
+        return (
+            ", ".join(f"**{w}**" for w in words[:-1])
+            + f", and **{words[-1]}**"
+        )
+
+    if top_supporting:
+        explanation = (
+            f"The model leaned toward **{prediction_label}** "
+            f"mainly because of {join_words(top_supporting)}, "
+            "which had the strongest influence on this prediction. "
+        )
+    else:
+        top_word, _ = sorted_scores[0]
+        explanation = (
+            f"The model leaned toward **{prediction_label}** "
+            f"primarily because of the word **{top_word}**, "
+            "which had the strongest influence on this prediction. "
+        )
+
+    if top_opposing:
+        explanation += (
+            f"Meanwhile, {join_words(top_opposing)} pulled "
+            "slightly in the opposite direction, but not enough "
+            "to change the outcome. "
+        )
 
     if confidence >= 0.85:
         explanation += (
@@ -1037,7 +1070,11 @@ render_html(
         padding: 9px 11px;
         font-size: 13px;
         margin-top: 12px;
+        margin-bottom: 2px;
         line-height: 1.45;
+        box-sizing: border-box;
+        width: 100%;
+        overflow-wrap: break-word;
     }
 
     .domain-ok {
@@ -1084,6 +1121,12 @@ render_html(
     }
 
     #MainMenu, footer, header { visibility: hidden; }
+
+    /* Native bordered containers (used for cards) — keep their
+       content inside the padded box so nothing bleeds past the edge */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        box-sizing: border-box;
+    }
 
     @media (max-width: 800px) {
         .header-title { font-size: 17px; }
