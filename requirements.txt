@@ -1,9 +1,11 @@
-streamlit
 torch
 torchvision
 transformers
-huggingface_hub
-numpy
-pillow
-opencv-python-headless
+gradio
 lime
+Pillow
+numpy
+opencv-python-headless
+scipy
+scikit-learn
+huggingface_hub
